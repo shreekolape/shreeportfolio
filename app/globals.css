@@ -1,26 +1,100 @@
 @import "tailwindcss";
+@import "lenis/dist/lenis.css";
 
+/* ------------------------------------------------------------------
+   Design tokens
+   The site is dark-only by design. The accent is driven at runtime by
+   AccentProvider, which writes --accent-h (hue) and --accent-glow (0–1).
+   Components only ever reference --accent / --accent-glow.
+   ------------------------------------------------------------------ */
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  color-scheme: dark;
+
+  --bg: #0a0a0b;
+  --bg-elevated: #121214;
+  --fg: #ededea;
+  --muted: #9a9a9f; /* ~7:1 on --bg */
+  --subtle: #6e6e74; /* decorative / large text only */
+  --line: rgb(255 255 255 / 0.09);
+
+  /* Accent: hue travels cyan (200) → violet (295) → magenta (335) with scroll. */
+  --accent-h: 200;
+  --accent: oklch(0.8 0.15 var(--accent-h));
+  --accent-soft: oklch(0.8 0.15 var(--accent-h) / 0.14);
+  /* 0 at rest, up to 1 at high scroll velocity */
+  --accent-glow: 0;
+  --accent-shadow:
+    0 0 calc(6px + 22px * var(--accent-glow))
+    oklch(0.8 0.15 var(--accent-h) / calc(0.35 + 0.45 * var(--accent-glow)));
+
+  --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
+  --header-h: 4.5rem;
 }
 
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
+  --color-bg: var(--bg);
+  --color-bg-elevated: var(--bg-elevated);
+  --color-fg: var(--fg);
+  --color-muted: var(--muted);
+  --color-subtle: var(--subtle);
+  --color-line: var(--line);
+  --color-accent: var(--accent);
+  --color-accent-soft: var(--accent-soft);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+html {
+  background: var(--bg);
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background: var(--bg);
+  color: var(--fg);
+  font-family: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+::selection {
+  background: var(--accent);
+  color: var(--bg);
+}
+
+/* Visible, accent-coloured focus ring for keyboard users. */
+:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 3px;
+  border-radius: 2px;
+}
+
+/* Custom cursor hides the native one (class set only on fine-pointer devices). */
+html.has-custom-cursor,
+html.has-custom-cursor * {
+  cursor: none !important;
+}
+
+/* Links that are still placeholders ("#") get a visible marker in development. */
+html[data-env="development"] [data-placeholder-link] {
+  outline: 1px dashed oklch(0.8 0.17 80);
+  outline-offset: 2px;
+}
+
+@utility text-glow {
+  text-shadow: var(--accent-shadow);
+}
+
+@utility shadow-glow {
+  box-shadow: var(--accent-shadow);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
 }
