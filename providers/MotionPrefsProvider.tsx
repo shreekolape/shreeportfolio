@@ -1,6 +1,6 @@
 "use client";
 
-import { createContext, useContext, useMemo, useSyncExternalStore, type ReactNode } from "react";
+import { createContext, useContext, useEffect, useMemo, useSyncExternalStore, type ReactNode } from "react";
 import { useMediaQuery } from "@/hooks/useMediaQuery";
 
 export type MotionPrefs = {
@@ -38,6 +38,14 @@ export function MotionPrefsProvider({ children }: { children: ReactNode }) {
   const finePointer = useMediaQuery("(hover: hover) and (pointer: fine)", false);
   const smallScreen = useMediaQuery("(max-width: 767.98px)", true);
   const lowPower = useSyncExternalStore(noopSubscribe, detectLowPower, () => true);
+
+  // Small screens and reduced motion are handled by CSS media queries; low power
+  // can only be detected in JS, so flag it for the `.no3d-only` fallbacks.
+  useEffect(() => {
+    const html = document.documentElement;
+    if (lowPower) html.setAttribute("data-no3d", "");
+    else html.removeAttribute("data-no3d");
+  }, [lowPower]);
 
   const value = useMemo<MotionPrefs>(
     () => ({

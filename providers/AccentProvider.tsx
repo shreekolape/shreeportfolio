@@ -12,6 +12,13 @@ const VELOCITY_FOR_FULL_GLOW = 50;
 // How quickly glow chases its target (per frame, 0–1).
 const GLOW_EASE = 0.08;
 
+/** Lightness / chroma of --accent in globals.css (oklch(0.8 0.15 hue)). */
+export const ACCENT_L = 0.8;
+export const ACCENT_C = 0.15;
+
+/** Live values for non-CSS consumers (the 3D scene reads these every frame). */
+export const liveAccent = { hue: HUE_STOPS[0] as number, glow: 0 };
+
 const clamp01 = (n: number) => Math.min(1, Math.max(0, n));
 
 function hueAt(progress: number): number {
@@ -41,6 +48,8 @@ export function AccentProvider({ children }: { children: ReactNode }) {
       const target = reducedMotion || !lenis ? 0 : clamp01(Math.abs(lenis.velocity) / VELOCITY_FOR_FULL_GLOW);
       glow += (target - glow) * GLOW_EASE;
       if (glow < 0.001) glow = 0;
+      liveAccent.hue = hue;
+      liveAccent.glow = glow;
 
       if (Math.abs(hue - lastHue) > 0.2) {
         root.style.setProperty("--accent-h", hue.toFixed(1));

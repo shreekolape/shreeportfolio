@@ -10,7 +10,7 @@ export function WhatIDo() {
         <h2 id="what-i-do-heading" className="font-mono text-xs uppercase tracking-widest text-muted">
           {heading}
         </h2>
-        <div className="mt-8 grid gap-px overflow-hidden rounded-2xl border border-line bg-line md:grid-cols-2">
+        <div className="scene-aside mt-8 grid gap-px overflow-hidden rounded-2xl border border-line bg-line md:grid-cols-2">
           {blocks.map((block, i) => (
             <article key={block.title} className="bg-bg p-8 sm:p-12">
               <span aria-hidden="true" className="font-mono text-xs text-accent">

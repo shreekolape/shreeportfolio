@@ -8,6 +8,7 @@ export function Intro() {
   return (
     <section data-scene="intro" aria-label="Intro" className="py-28 sm:py-40">
       <div className="wrap">
+        <div className="scene-aside">
         <p className="max-w-4xl text-2xl font-medium leading-snug tracking-tight sm:text-4xl sm:leading-[1.2]">
           {text}
         </p>
@@ -17,6 +18,7 @@ export function Intro() {
         >
           {link.label}
         </TransitionLink>
+        </div>
       </div>
     </section>
   );

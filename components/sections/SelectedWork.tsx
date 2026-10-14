@@ -3,7 +3,6 @@
 import { home } from "@/content/home";
 import { featuredProjects } from "@/content/projects";
 import { setActivePreview } from "@/lib/previewStore";
-import { useMotionPrefs } from "@/providers/MotionPrefsProvider";
 import { TransitionLink } from "@/components/transitions/TransitionLink";
 import { MediaFrame } from "@/components/ui/MediaFrame";
 import { Tag } from "@/components/ui/Tag";
@@ -14,7 +13,6 @@ import { Tag } from "@/components/ui/Tag";
  */
 export function SelectedWork() {
   const { heading, link } = home.selectedWork;
-  const { allow3D } = useMotionPrefs();
 
   return (
     <section data-scene="work" aria-labelledby="selected-work-heading" className="py-20 sm:py-32">
@@ -23,7 +21,7 @@ export function SelectedWork() {
           {heading}
         </h2>
 
-        <ul className="mt-8 border-t border-line" onPointerLeave={() => setActivePreview(null)}>
+        <ul className="scene-aside mt-8 border-t border-line" onPointerLeave={() => setActivePreview(null)}>
           {featuredProjects.map((project, i) => (
             <li key={project.slug} className="border-b border-line">
               <TransitionLink
@@ -39,14 +37,13 @@ export function SelectedWork() {
                 </span>
 
                 <div className="flex gap-4">
-                  {!allow3D && (
-                    <MediaFrame
-                      media={project.previewMedia}
-                      aspect="4 / 3"
-                      sizes="96px"
-                      className="w-24 shrink-0 rounded-lg"
-                    />
-                  )}
+                  {/* Inline thumbnail stands in for the 3D monitor preview. */}
+                  <MediaFrame
+                    media={project.previewMedia}
+                    aspect="4 / 3"
+                    sizes="96px"
+                    className="no3d-only w-24 shrink-0 rounded-lg"
+                  />
                   <div>
                     <h3 className="text-2xl font-semibold tracking-tight transition-colors group-hover:text-accent sm:text-3xl">
                       {project.title}

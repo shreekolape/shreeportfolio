@@ -5,6 +5,9 @@ import { site } from "@/content/site";
 import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
 import { CustomCursor } from "@/components/cursor/CustomCursor";
+import { Preloader } from "@/components/preloader/Preloader";
+import { SceneLayer } from "@/components/three/SceneLayer";
+import { preloadedHeadScript } from "@/lib/preloader";
 import { Providers } from "./providers";
 import "./globals.css";
 
@@ -35,9 +38,19 @@ export default function RootLayout({ children }: Readonly<{ children: ReactNode 
       lang="en"
       data-env={process.env.NODE_ENV}
       className={`${geistSans.variable} ${geistMono.variable} antialiased`}
+      // Inline scripts (preloader flag) and providers set attributes on <html>.
+      suppressHydrationWarning
     >
+      <head>
+        <script dangerouslySetInnerHTML={{ __html: preloadedHeadScript }} />
+        <noscript>
+          <style>{".preloader{display:none}"}</style>
+        </noscript>
+      </head>
       <body className="flex min-h-dvh flex-col">
         <Providers>
+          <Preloader />
+          <SceneLayer />
           <a
             href="#main"
             className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-[110] focus:rounded-full focus:bg-accent focus:px-4 focus:py-2 focus:text-bg"

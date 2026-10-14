@@ -48,8 +48,9 @@ html {
   background: var(--bg);
 }
 
+/* body stays transparent so the fixed 3D canvas (z-index -10) shows through;
+   the page colour comes from <html>. */
 body {
-  background: var(--bg);
   color: var(--fg);
   font-family: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif;
   -webkit-font-smoothing: antialiased;
@@ -93,6 +94,35 @@ html[data-env="development"] [data-placeholder-link] {
 /* Notes for Shree that only show in development. */
 html:not([data-env="development"]) [data-dev-note] {
   display: none;
+}
+
+/* ---- Preloader ---- */
+html[data-preloaded] .preloader {
+  display: none;
+}
+html.is-preloading {
+  overflow: hidden;
+}
+
+/* ---- 3D fallbacks ----
+   `.no3d-only` (scene still, inline thumbnails) shows wherever the canvas
+   won't: small screens, reduced motion, low-power or WebGL failure. */
+.no3d-only {
+  display: none;
+}
+@media (max-width: 767.98px), (prefers-reduced-motion: reduce) {
+  .no3d-only {
+    display: block;
+  }
+}
+html[data-no3d] .no3d-only {
+  display: block;
+}
+/* With the scene on, home content keeps to the left; the desk sits right. */
+@media (min-width: 1024px) {
+  html[data-scene3d] .scene-aside {
+    max-width: 44rem;
+  }
 }
 
 /* Page container: matches header/footer width and gutters. */
