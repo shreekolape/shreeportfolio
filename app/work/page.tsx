@@ -1,7 +1,16 @@
 import { workPage } from "@/content/labels";
+import { projects } from "@/content/projects";
+import { pageMetadata } from "@/lib/metadata";
 import { WorkGrid } from "@/components/work/WorkGrid";
 
-export const metadata = { title: workPage.heading };
+const titles = projects.map((p) => p.title);
+
+export const metadata = pageMetadata({
+  title: workPage.heading,
+  // Built from the project list so it never drifts from the data.
+  description: `Client projects: ${titles.slice(0, -1).join(", ")} and ${titles.at(-1)}.`,
+  path: "/work",
+});
 
 export default function WorkPage() {
   return (

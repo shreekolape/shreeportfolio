@@ -1,36 +1,65 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Shree Kolape: portfolio
 
-## Getting Started
+Next.js 16 (App Router, Cache Components) · TypeScript · Tailwind CSS v4 · GSAP + ScrollTrigger ·
+Lenis · React Three Fiber + drei · Howler.
 
-First, run the development server:
+## Run it
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+npm install
+npm run dev        # http://localhost:3000
+npm run build      # production build
+npm run start      # serve the production build
+npm run lint
+npm run typecheck
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Requires Node.js 20.9 or newer.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Editing content
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+All copy and data live in `content/`. Components only read from it.
 
-## Learn More
+| File | What's in it |
+| ---- | ------------ |
+| `content/site.ts` | Name, pitch, nav, footer, status line, preloader, email/socials |
+| `content/home.ts` | Hero, intro, Selected Work and What I Do copy |
+| `content/projects.ts` | All projects and case studies (`featured: true` = on the home page) |
+| `content/experience.ts` | Education and experience timeline |
+| `content/skills.ts` | Skill tiers (About) and the stack marquee (Home) |
+| `content/about.ts` / `content/contact.ts` | About and Contact page copy |
+| `content/labels.ts` | Small UI labels (case-study headings, 404) |
 
-To learn more about Next.js, take a look at the following resources:
+**Placeholders.** Every unknown is a `{PLACEHOLDER: ...}` string. While one is unfilled it shows on
+the page with a dashed outline, so nothing slips through. `CONTENT_TODO.md` lists every one, plus
+the media files, model and sounds still to supply.
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+**Images.** Media entries with `src: null` render as labelled gradient blocks. Point `src` at a file
+in `/public` to replace one.
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## Where things live
 
-## Deploy on Vercel
+- `components/three/sceneConfig.ts`: the 3D model path, clip names, screen mesh and camera shots
+  (see `public/models/README.md`).
+- `providers/`: motion preferences, smooth scroll (Lenis ↔ ScrollTrigger), scroll-reactive accent,
+  sound, page transitions.
+- `lib/motion.ts`: shared animation timing.
+- `app/api/contact/route.ts`: contact form endpoint (email provider not connected yet).
+- `proxy.ts`: returns a real 404 for unknown `/work/<slug>` URLs.
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+The 3D canvas only loads on desktop-class devices. Small screens, low-power devices,
+`prefers-reduced-motion` and WebGL failures get the static scene image and inline thumbnails.
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## Deploying to Vercel
+
+No `vercel.json` is needed: Vercel detects Next.js. Headers (security and asset caching) are set
+in `next.config.ts`.
+
+1. Push this repo to GitHub.
+2. In Vercel, **Add New → Project**, import the repo and keep the defaults (Framework: Next.js,
+   build `next build`).
+3. Add environment variables from `.env.example`. All are optional for a first deploy:
+   - `NEXT_PUBLIC_SITE_URL`: once you have a custom domain (until then the Vercel production URL
+     is used for canonical links, Open Graph, sitemap and robots).
+   - `CONTACT_*`: once an email provider is wired into `app/api/contact/route.ts`.
+4. Deploy. Each push to the main branch redeploys; other branches get preview URLs.

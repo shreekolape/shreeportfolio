@@ -1,12 +1,14 @@
 import type { ReactNode } from "react";
 import { about } from "@/content/about";
+import { site } from "@/content/site";
+import { pageMetadata } from "@/lib/metadata";
 import { education, experience } from "@/content/experience";
 import { skillTiers } from "@/content/skills";
 import { ContentText } from "@/components/ui/ContentText";
 import { MediaFrame } from "@/components/ui/MediaFrame";
 import { Tag } from "@/components/ui/Tag";
 
-export const metadata = { title: about.heading };
+export const metadata = pageMetadata({ title: about.heading, description: site.pitch, path: "/about" });
 
 function Section({ id, title, children }: { id: string; title: string; children: ReactNode }) {
   return (

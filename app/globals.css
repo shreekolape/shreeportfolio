@@ -14,7 +14,7 @@
   --bg-elevated: #121214;
   --fg: #ededea;
   --muted: #9a9a9f; /* ~7:1 on --bg */
-  --subtle: #6e6e74; /* decorative / large text only */
+  --subtle: #838389; /* ~5.2:1 on --bg: passes AA for small labels */
   --line: rgb(255 255 255 / 0.09);
 
   /* Accent: hue travels cyan (200) → violet (295) → magenta (335) with scroll. */

@@ -5,6 +5,7 @@ import { getNextProject, getProject, projects } from "@/content/projects";
 import { caseStudyLabels as L } from "@/content/labels";
 import type { WorkStatus } from "@/content/types";
 import { isPlaceholder } from "@/lib/links";
+import { pageMetadata } from "@/lib/metadata";
 import { ContentText } from "@/components/ui/ContentText";
 import { MediaFrame } from "@/components/ui/MediaFrame";
 import { SmartLink } from "@/components/ui/SmartLink";
@@ -18,7 +19,7 @@ export function generateStaticParams() {
 export async function generateMetadata({ params }: PageProps<"/work/[slug]">): Promise<Metadata> {
   const project = getProject((await params).slug);
   if (!project) return {};
-  return { title: project.title, description: project.oneLiner };
+  return pageMetadata({ title: project.title, description: project.oneLiner, path: `/work/${project.slug}` });
 }
 
 function Section({ title, children }: { title: string; children: ReactNode }) {

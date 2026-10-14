@@ -9,6 +9,7 @@ import { Preloader } from "@/components/preloader/Preloader";
 import { ScrollReveal } from "@/components/transitions/ScrollReveal";
 import { SceneLayer } from "@/components/three/SceneLayer";
 import { preloadedHeadScript } from "@/lib/preloader";
+import { siteUrl } from "@/lib/siteUrl";
 import { Providers } from "./providers";
 import "./globals.css";
 
@@ -22,10 +23,25 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
-// Full per-page metadata, Open Graph, sitemap and robots come in Phase 6.
+// Pages override title/description; OG images come from opengraph-image.tsx files.
 export const metadata: Metadata = {
+  metadataBase: new URL(siteUrl),
   title: { default: site.name, template: `%s · ${site.name}` },
   description: site.pitch,
+  applicationName: site.name,
+  authors: [{ name: site.name }],
+  creator: site.name,
+  openGraph: {
+    type: "website",
+    siteName: site.name,
+    title: site.name,
+    description: site.pitch,
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: site.name,
+    description: site.pitch,
+  },
 };
 
 export const viewport: Viewport = {

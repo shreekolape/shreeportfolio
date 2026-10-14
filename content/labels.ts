@@ -5,6 +5,12 @@ export const workPage = {
   filtersLabel: "Filter projects",
 };
 
+export const notFoundPage = {
+  code: "404",
+  heading: "Page not found.",
+  link: { label: "Back to home →", href: "/" },
+};
+
 export const caseStudyLabels = {
   type: "Type",
   role: "Role",

@@ -1,10 +1,11 @@
 import { contact } from "@/content/contact";
 import { site } from "@/content/site";
+import { pageMetadata } from "@/lib/metadata";
 import { ContactForm } from "@/components/contact/ContactForm";
 import { SmartLink } from "@/components/ui/SmartLink";
 import { StatusLine } from "@/components/ui/StatusLine";
 
-export const metadata = { title: "Contact", description: contact.subline };
+export const metadata = pageMetadata({ title: "Contact", description: contact.subline, path: "/contact" });
 
 const linkClass = "link-underline text-lg text-fg transition-colors hover:text-accent";
 
