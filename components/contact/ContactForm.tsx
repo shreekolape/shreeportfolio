@@ -3,7 +3,6 @@
 import { useRef, useState, type FormEvent } from "react";
 import { contact } from "@/content/contact";
 import { projectTypes, validateContact, type ContactErrors, type ContactPayload } from "@/lib/contactSchema";
-import { useSound } from "@/providers/SoundProvider";
 
 type Status = "idle" | "sending" | "success" | "error";
 
@@ -15,7 +14,6 @@ export function ContactForm() {
   const formRef = useRef<HTMLFormElement>(null);
   const [errors, setErrors] = useState<ContactErrors>({});
   const [status, setStatus] = useState<Status>("idle");
-  const { play } = useSound();
 
   const onSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -35,7 +33,6 @@ export function ContactForm() {
       return;
     }
 
-    play("click");
     setStatus("sending");
     try {
       const res = await fetch("/api/contact", {
@@ -114,8 +111,9 @@ export function ContactForm() {
       <div className="flex flex-wrap items-center gap-5">
         <button
           type="submit"
+          data-sound=""
           disabled={status === "sending"}
-          className="inline-flex h-14 items-center rounded-full bg-accent px-9 font-medium text-bg shadow-glow transition-[transform,opacity] hover:scale-[1.03] disabled:opacity-60"
+          className="inline-flex h-14 items-center rounded-full bg-accent px-9 font-medium text-bg shadow-glow transition-[transform,opacity] duration-300 ease-[var(--ease-out)] hover:scale-[1.03] active:scale-[0.97] disabled:opacity-60"
         >
           {status === "sending" ? contact.form.sending : contact.form.submit}
         </button>

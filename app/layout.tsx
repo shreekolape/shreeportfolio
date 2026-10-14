@@ -6,6 +6,7 @@ import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
 import { CustomCursor } from "@/components/cursor/CustomCursor";
 import { Preloader } from "@/components/preloader/Preloader";
+import { ScrollReveal } from "@/components/transitions/ScrollReveal";
 import { SceneLayer } from "@/components/three/SceneLayer";
 import { preloadedHeadScript } from "@/lib/preloader";
 import { Providers } from "./providers";
@@ -63,6 +64,7 @@ export default function RootLayout({ children }: Readonly<{ children: ReactNode 
           </main>
           <Footer />
           <CustomCursor />
+          <ScrollReveal />
         </Providers>
       </body>
     </html>

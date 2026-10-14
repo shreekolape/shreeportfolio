@@ -6,7 +6,6 @@ import { gsap } from "@/lib/gsap";
 import { projectFilters, projects } from "@/content/projects";
 import { workPage } from "@/content/labels";
 import { useMotionPrefs } from "@/providers/MotionPrefsProvider";
-import { useSound } from "@/providers/SoundProvider";
 import { ProjectCard } from "./ProjectCard";
 
 if (typeof window !== "undefined") gsap.registerPlugin(Flip);
@@ -19,11 +18,9 @@ export function WorkGrid() {
   const gridRef = useRef<HTMLUListElement>(null);
   const flipState = useRef<Flip.FlipState | null>(null);
   const { reducedMotion } = useMotionPrefs();
-  const { play } = useSound();
 
   const choose = (next: Filter) => {
     if (next === filter) return;
-    play("click");
     if (!reducedMotion && gridRef.current) {
       flipState.current = Flip.getState(gridRef.current.children);
     }
@@ -55,10 +52,11 @@ export function WorkGrid() {
             <button
               key={f}
               type="button"
+              data-sound=""
               aria-pressed={active}
               onClick={() => choose(f)}
               className={[
-                "rounded-full border px-4 py-2 font-mono text-xs transition-colors",
+                "rounded-full border px-4 py-2 font-mono text-xs transition-[color,background-color,border-color,transform] duration-200 active:scale-95",
                 active
                   ? "border-accent bg-accent-soft text-accent"
                   : "border-line text-muted hover:border-fg/30 hover:text-fg",

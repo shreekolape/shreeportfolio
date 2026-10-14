@@ -5,16 +5,13 @@ import { useSound } from "@/providers/SoundProvider";
 
 /** Header toggle. Sound is off by default; the choice persists in localStorage. */
 export function SoundToggle() {
-  const { enabled, toggle, play } = useSound();
+  const { enabled, toggle } = useSound();
   const { label, on, off } = site.soundToggle;
 
   return (
     <button
       type="button"
-      onClick={() => {
-        toggle();
-        play("toggle");
-      }}
+      onClick={toggle}
       aria-pressed={enabled}
       aria-label={`${label}: ${enabled ? on : off}`}
       className="group flex items-center gap-2 rounded-full px-2 py-1.5 font-mono text-[11px] uppercase tracking-wider text-muted transition-colors hover:text-fg"
@@ -32,7 +29,8 @@ export function SoundToggle() {
         ))}
       </span>
       <span className="hidden sm:inline">
-        {label} {enabled ? on : off}
+        {label} {/* Fixed width so On/Off doesn't nudge the nav. */}
+        <span className="inline-block w-[3ch] text-left">{enabled ? on : off}</span>
       </span>
     </button>
   );

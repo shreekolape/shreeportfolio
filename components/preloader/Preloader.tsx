@@ -3,6 +3,7 @@
 import { useEffect, useLayoutEffect, useRef, useState, useSyncExternalStore } from "react";
 import { site } from "@/content/site";
 import { gsap } from "@/lib/gsap";
+import { duration, ease, stagger } from "@/lib/motion";
 import { PRELOADED_KEY, PRELOADER_DONE_EVENT } from "@/lib/preloader";
 import { sceneState } from "@/lib/sceneStore";
 import { readStorage, writeStorage } from "@/lib/storage";
@@ -68,22 +69,30 @@ export function Preloader() {
     let exiting = false;
     let exitTween: gsap.core.Timeline | gsap.core.Tween | null = null;
 
+    const announce = () => window.dispatchEvent(new Event(PRELOADER_DONE_EVENT));
     const done = () => {
       html.classList.remove("is-preloading");
       setFinished(true);
-      window.dispatchEvent(new Event(PRELOADER_DONE_EVENT));
     };
 
     const exit = () => {
       writeStorage(PRELOADED_KEY, "1", "session");
       if (reduced) {
-        exitTween = gsap.to(root, { opacity: 0, duration: 0.3, onComplete: done });
+        exitTween = gsap.to(root, { opacity: 0, duration: duration.fast, onComplete: () => (announce(), done()) });
         return;
       }
       exitTween = gsap
         .timeline({ onComplete: done })
-        .to(root.querySelectorAll("[data-pl-fade]"), { opacity: 0, y: -16, duration: 0.4, stagger: 0.06, ease: "power2.in" })
-        .to(root, { yPercent: -100, duration: 0.95, ease: "expo.inOut" }, "-=0.15");
+        .to(root.querySelectorAll("[data-pl-fade]"), {
+          opacity: 0,
+          y: -16,
+          duration: 0.4,
+          stagger: stagger.tight,
+          ease: "power2.in",
+        })
+        .to(root, { yPercent: -100, duration: duration.slow, ease: ease.inOutStrong }, "-=0.15")
+        // Start the hero entrance while the panel is still clearing the top of the screen.
+        .add(announce, "-=0.45");
     };
 
     const tick = () => {

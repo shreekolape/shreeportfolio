@@ -17,13 +17,17 @@ export function SelectedWork() {
   return (
     <section data-scene="work" aria-labelledby="selected-work-heading" className="py-20 sm:py-32">
       <div className="wrap">
-        <h2 id="selected-work-heading" className="font-mono text-xs uppercase tracking-widest text-muted">
+        <h2
+          id="selected-work-heading"
+          data-reveal=""
+          className="font-mono text-xs uppercase tracking-widest text-muted"
+        >
           {heading}
         </h2>
 
         <ul className="scene-aside mt-8 border-t border-line" onPointerLeave={() => setActivePreview(null)}>
           {featuredProjects.map((project, i) => (
-            <li key={project.slug} className="border-b border-line">
+            <li key={project.slug} data-reveal="" className="border-b border-line">
               <TransitionLink
                 href={`/work/${project.slug}`}
                 data-cursor="View"
@@ -44,7 +48,7 @@ export function SelectedWork() {
                     sizes="96px"
                     className="no3d-only w-24 shrink-0 rounded-lg"
                   />
-                  <div>
+                  <div className="transition-transform duration-500 ease-[var(--ease-out)] md:group-hover:translate-x-2">
                     <h3 className="text-2xl font-semibold tracking-tight transition-colors group-hover:text-accent sm:text-3xl">
                       {project.title}
                     </h3>
@@ -74,7 +78,7 @@ export function SelectedWork() {
 
         <TransitionLink
           href={link.href}
-          className="mt-10 inline-block font-mono text-sm text-accent transition-[text-shadow] hover:text-glow"
+          className="link-underline mt-10 inline-block font-mono text-sm text-accent transition-[text-shadow] hover:text-glow"
         >
           {link.label}
         </TransitionLink>

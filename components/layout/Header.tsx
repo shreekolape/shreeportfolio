@@ -17,6 +17,7 @@ export function Header() {
       <div className="mx-auto flex h-full max-w-7xl items-center justify-between gap-4 px-4 sm:px-8">
         <TransitionLink
           href="/"
+          data-sound=""
           className="text-sm font-medium tracking-tight text-fg transition-colors hover:text-accent"
         >
           <span className="sm:hidden">{site.shortName}</span>
@@ -32,6 +33,7 @@ export function Header() {
                   <li key={item.href}>
                     <TransitionLink
                       href={item.href}
+                      data-sound=""
                       aria-current={active ? "page" : undefined}
                       className={[
                         "relative block rounded-full px-2 py-1.5 text-[13px] transition-colors sm:px-3 sm:text-sm",

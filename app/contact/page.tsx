@@ -6,7 +6,7 @@ import { StatusLine } from "@/components/ui/StatusLine";
 
 export const metadata = { title: "Contact", description: contact.subline };
 
-const linkClass = "text-lg text-fg transition-colors hover:text-accent";
+const linkClass = "link-underline text-lg text-fg transition-colors hover:text-accent";
 
 export default function ContactPage() {
   const { email, socials } = site.contact;

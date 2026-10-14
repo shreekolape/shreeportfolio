@@ -23,7 +23,7 @@ export async function generateMetadata({ params }: PageProps<"/work/[slug]">): P
 
 function Section({ title, children }: { title: string; children: ReactNode }) {
   return (
-    <section className="grid gap-4 border-t border-line py-12 sm:py-16 md:grid-cols-[minmax(0,1fr)_minmax(0,2.2fr)] md:gap-12">
+    <section data-reveal="" className="grid gap-4 border-t border-line py-12 sm:py-16 md:grid-cols-[minmax(0,1fr)_minmax(0,2.2fr)] md:gap-12">
       <h2 className="font-mono text-xs uppercase tracking-widest text-muted">{title}</h2>
       <div className="min-w-0">{children}</div>
     </section>

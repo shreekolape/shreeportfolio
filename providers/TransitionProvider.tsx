@@ -11,6 +11,7 @@ import {
   type ReactNode,
 } from "react";
 import { gsap, ScrollTrigger } from "@/lib/gsap";
+import { appState, ease } from "@/lib/motion";
 import { useLenis } from "./SmoothScrollProvider";
 import { useMotionPrefs } from "./MotionPrefsProvider";
 
@@ -24,6 +25,7 @@ const TransitionContext = createContext<TransitionContextValue | null>(null);
 
 const COVER_DURATION = 0.55;
 const REVEAL_DURATION = 0.65;
+const LAYER_STAGGER = 0.07;
 
 /**
  * Curtain-wipe page transitions. Links call navigate() (via TransitionLink);
@@ -56,8 +58,8 @@ export function TransitionProvider({ children }: { children: ReactNode }) {
       gsap.to(layers, {
         yPercent: 0,
         duration: COVER_DURATION,
-        ease: "power3.inOut",
-        stagger: 0.07,
+        ease: ease.inOut,
+        stagger: LAYER_STAGGER,
         onComplete: () => router.push(href, { scroll: false }),
       });
     },
@@ -69,6 +71,8 @@ export function TransitionProvider({ children }: { children: ReactNode }) {
     lenis?.scrollTo(0, { immediate: true, force: true });
     window.scrollTo(0, 0);
     ScrollTrigger.refresh();
+    // Children's effects ran first, so on the very first pass they saw mounted === false.
+    appState.mounted = true;
 
     const curtain = curtainRef.current;
     if (!pendingRef.current || !curtain) return;
@@ -77,8 +81,8 @@ export function TransitionProvider({ children }: { children: ReactNode }) {
     gsap.to(Array.from(curtain.children).reverse(), {
       yPercent: -100,
       duration: REVEAL_DURATION,
-      ease: "power3.inOut",
-      stagger: 0.07,
+      ease: ease.inOut,
+      stagger: LAYER_STAGGER,
       delay: 0.05,
       onComplete: () => gsap.set(curtain, { visibility: "hidden", pointerEvents: "none" }),
     });

@@ -12,6 +12,7 @@ function Section({ id, title, children }: { id: string; title: string; children:
   return (
     <section
       aria-labelledby={id}
+      data-reveal=""
       className="grid gap-6 border-t border-line py-14 sm:py-20 md:grid-cols-[minmax(0,1fr)_minmax(0,2.4fr)] md:gap-12"
     >
       <h2 id={id} className="font-mono text-xs uppercase tracking-widest text-muted">
