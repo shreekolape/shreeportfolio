@@ -1,6 +1,11 @@
-/** A link that isn't ready yet: "#" or anything still carrying a {PLACEHOLDER: ...}. */
+/** True for any content value still carrying a {PLACEHOLDER: ...}. */
+export function isPlaceholder(value: string | undefined | null): boolean {
+  return typeof value === "string" && value.includes("{PLACEHOLDER");
+}
+
+/** A link that isn't ready yet: empty, "#" or a {PLACEHOLDER: ...}. */
 export function isPlaceholderHref(href: string | undefined | null): boolean {
-  return !href || href === "#" || href.includes("{PLACEHOLDER");
+  return !href || href === "#" || isPlaceholder(href);
 }
 
 export function isExternalHref(href: string): boolean {
