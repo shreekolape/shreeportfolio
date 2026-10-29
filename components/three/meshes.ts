@@ -156,12 +156,13 @@ export function buildHoodRoll() {
   const rings = 34;
   const segs = 18;
   const geo = createSweepGeometry(rings, segs);
-  // Raised almost to the neck base (and bulked up below) so it covers most of a short neck.
-  const y0 = C.upperSpine - 0.002;
-  const span = 1.85; // radians each side of the back
+  // Sits above the (now short) neck base and wraps further round, reading as a
+  // collar around the back and sides rather than just a back-of-neck roll.
+  const y0 = C.upperSpine + 0.006;
+  const span = 2.0; // radians each side of the back
   const path = (u: number, out: THREE.Vector3) => {
     const a = (u * 2 - 1) * span;
-    return out.set(0.096 * Math.sin(a), y0 + 0.014 * Math.cos(a), 0.075 * Math.cos(a) + 0.006);
+    return out.set(0.098 * Math.sin(a), y0 + 0.014 * Math.cos(a), 0.078 * Math.cos(a) + 0.006);
   };
   const p = new THREE.Vector3();
   const p2 = new THREE.Vector3();
@@ -180,7 +181,7 @@ export function buildHoodRoll() {
     normal.crossVectors(binormal, tangent).normalize();
     // Thick at the back, tapering toward the front; soft fabric wrinkles.
     const across = Math.cos(((u * 2 - 1) * Math.PI) / 2);
-    const rad = (0.016 + 0.044 * across ** 1.3) * (1 + 0.08 * Math.sin(u * 40) * across);
+    const rad = (0.02 + 0.05 * across ** 1.3) * (1 + 0.08 * Math.sin(u * 40) * across);
     // Flattened against the body (wider outward than upward).
     out
       .copy(p)
@@ -197,7 +198,7 @@ export function buildHoodDrape() {
   const geo = new THREE.BufferGeometry();
   const pos = new Float32Array(cols * rows * 3);
   const idx: number[] = [];
-  const top = C.upperSpine - 0.02; // just under the roll
+  const top = C.upperSpine - 0.005; // just under the roll
   const bottom = 0.17; // upper back
   for (let j = 0; j < rows; j++) {
     const v = j / (rows - 1);
@@ -272,17 +273,17 @@ export const SLEEVE_SEGMENTS = 22;
 const sleeveCurve = new THREE.CatmullRomCurve3([new THREE.Vector3(), new THREE.Vector3(), new THREE.Vector3(), new THREE.Vector3()], false, "centripetal");
 const sleeveFrames = allocFrames(SLEEVE_RINGS);
 
-/** Sleeve radius along the arm (u: 0 inside the shoulder → 1 at the wrist). */
+/** Sleeve radius along the arm (u: 0 inside the shoulder → 1 at the wrist). Forearm/wrist ~20% slimmer, relaxed above the elbow. */
 function sleeveRadius(u: number, angle: number) {
   const shoulder = 0.058 - 0.01 * smooth(0, 0.14, u);
   const upper = 0.049;
-  const fore = 0.044;
+  const fore = 0.035;
   let r = u < 0.14 ? shoulder : u < 0.52 ? upper : u < 0.6 ? upper - (upper - fore) * smooth(0.52, 0.6, u) : fore;
   // Fabric bunching at the elbow and just above the cuff.
   r += 0.0025 * Math.sin(angle * 3 + u * 30) * (smooth(0.45, 0.55, u) - smooth(0.6, 0.68, u));
   r += 0.0015 * smooth(0.82, 0.9, u) * (1 - smooth(0.9, 0.93, u)) * (1 + Math.sin(angle * 5));
   // Ribbed cuff, snug at the wrist.
-  if (u > 0.92) r = 0.039 * (1 + 0.03 * Math.cos(angle * 26));
+  if (u > 0.92) r = 0.031 * (1 + 0.03 * Math.cos(angle * 26));
   return r;
 }
 
@@ -295,8 +296,9 @@ export function writeSleeve(
   chestCenter: THREE.Vector3,
 ) {
   const pts = sleeveCurve.points;
-  // Start inside the torso so the sleeve grows out of the shoulder seamlessly.
-  pts[0].copy(shoulder).lerp(chestCenter, 0.28).addScaledVector(UP, 0.02);
+  // Buried deep inside the chest (not just under the surface) so the sleeve's
+  // open start never shows as a seam/disc — it blends into the torso mesh.
+  pts[0].copy(shoulder).lerp(chestCenter, 0.45).addScaledVector(UP, 0.015);
   pts[1].copy(shoulder);
   pts[2].copy(elbow);
   pts[3].copy(wrist);
@@ -388,9 +390,9 @@ export function buildHead() {
     v.fromBufferAttribute(pos, i);
     const { y } = v;
     let { x, z } = v;
-    // Jaw: narrow the lower head, with a firmer line under the cheeks.
-    x *= 1 - 0.26 * smooth(-0.15, -1, y) - 0.1 * smooth(-0.45, -0.9, y);
-    z *= 1 - 0.08 * smooth(-0.3, -1, y) * (z > 0 ? 1 : 0);
+    // Jaw: a gentle, rounded taper (not a pointed V) — wider and softer at the chin.
+    x *= 1 - 0.16 * smooth(-0.2, -0.95, y);
+    z *= 1 - 0.04 * smooth(-0.3, -1, y) * (z > 0 ? 1 : 0);
     pos.setXYZ(i, x * hx, y * hy, z * hz);
 
     // Beard + moustache: a soft darker tint over the lower face/jaw and the
@@ -429,15 +431,15 @@ export function buildHair() {
     const at = Math.abs(theta);
     // Hairline height (unit sphere y): high on the forehead, above the ears, low at the nape.
     let line = 0.5 - 0.26 * smooth(0.35, 1.0, at) + 0.04 * smooth(1.1, 1.5, at) - 0.72 * smooth(1.7, 2.9, at);
-    // Fringe: wavy edge falling onto the forehead (stops above the glasses).
+    // Fringe: wavy edge falling onto the forehead, down to just above the glasses.
     const fringe = 1 - smooth(0.55, 0.85, at);
-    line -= fringe * (0.17 + 0.05 * Math.sin(theta * 26) + 0.02 * Math.sin(theta * 61));
+    line -= fringe * (0.36 + 0.05 * Math.sin(theta * 26) + 0.02 * Math.sin(theta * 61));
     const mask = smooth(line - 0.07, line + 0.03, d.y);
 
-    // Thickness: big volume on top, short at the sides, a little at the back.
+    // Thickness: lots of volume on top, fuller sides, a little at the back.
     const top = smooth(0.15, 0.95, d.y);
     const sides = smooth(0.7, 1.4, at) * (1 - smooth(2.2, 2.9, at));
-    let thick = 0.06 + 0.2 * top - 0.03 * sides + 0.02 * smooth(2.2, 3.1, at);
+    let thick = 0.065 + 0.3 * top + 0.035 * sides + 0.02 * smooth(2.2, 3.1, at);
     // Soft wavy-to-curly bumps (curlier on top), plus a few larger messy lumps.
     const curl =
       0.034 * Math.sin(17 * d.x + 3) * Math.sin(15 * d.y + 1) * Math.sin(19 * d.z + 2) +
@@ -447,11 +449,13 @@ export function buildHair() {
     // Fringe hangs forward and down over the forehead.
     let dy = 0;
     if (fringe > 0 && d.y < 0.55 && d.z < 0) {
-      dy = -0.035 * fringe * smooth(0.55, 0.3, d.y);
-      thick = Math.max(thick, 0.07 * fringe);
+      dy = -0.055 * fringe * smooth(0.55, 0.3, d.y);
+      thick = Math.max(thick, 0.08 * fringe);
     }
     // Outside the hairline the shell sinks well inside the skull (the jaw is
     // narrower than the base ellipsoid), so only the hair itself is visible.
+    // The floor (0.4) plus thickness lets the crown sit slightly proud of the
+    // head's own outline, instead of hugging it exactly.
     const scale = 0.6 + mask * (0.4 + Math.max(0.02, thick));
     pos.setXYZ(i, d.x * hx * scale, (d.y + dy * mask) * hy * scale, d.z * hz * scale);
 

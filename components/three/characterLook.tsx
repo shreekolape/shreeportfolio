@@ -26,7 +26,7 @@ export const looks = {
   head: new THREE.MeshStandardMaterial({ vertexColors: true, roughness: 0.76, metalness: 0 }),
   /** Vertex-coloured: base + highlight on the raised curls (see meshes.buildHair). */
   hair: new THREE.MeshStandardMaterial({ vertexColors: true, roughness: 0.56, metalness: 0 }),
-  hoodie: clay("#1b1b1f", 0.86),
+  hoodie: clay("#1e1e24", 0.9),
   pants: clay("#2a2d34", 0.84),
   shoe: clay("#38383f", 0.7),
   sole: clay("#9d988f", 0.8),
@@ -85,17 +85,18 @@ const LENS_X = 0.033;
 const TEMPLE_R = 0.0028;
 
 /**
- * Temple-arm path from the lens hinge back over the side of the head,
- * following its curve (ellipse in x/z at a roughly constant height) rather
- * than running straight back.
+ * Temple-arm path from the lens hinge, running backward (+z; the face is at
+ * -z) over the side of the head, hugging its curve, ending at ear level.
+ * Never goes more negative in z than the hinge, so nothing sticks out in
+ * front of the face when seen from the side.
  */
 function templePoints(sx: -1 | 1, hinge: THREE.Vector3): THREE.Vector3[] {
   const [hx, , hz] = C.head;
   return [
     hinge,
-    new THREE.Vector3(sx * hx * 0.97, hinge.y + 0.002, -hz * 0.55),
-    new THREE.Vector3(sx * hx * 1.03, hinge.y - 0.002, -hz * 0.05),
-    new THREE.Vector3(sx * hx * 0.95, hinge.y - 0.009, hz * 0.3),
+    new THREE.Vector3(sx * hx * 0.99, hinge.y + 0.001, hz * 0.45),
+    new THREE.Vector3(sx * hx * 1.05, hinge.y - 0.001, hz * 0.85),
+    new THREE.Vector3(sx * hx * 0.98, hinge.y - 0.004, hz * 1.05),
   ];
 }
 
