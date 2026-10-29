@@ -51,10 +51,10 @@ export const site = {
   } satisfies Media,
 
   contact: {
-    email: "{PLACEHOLDER: email address}",
+    email: "workwidshree@gmail.com",
     socials: [
-      { label: "GitHub", href: "{PLACEHOLDER: GitHub profile URL}" },
-      { label: "LinkedIn", href: "{PLACEHOLDER: LinkedIn profile URL}" },
+      { label: "GitHub", href: "https://github.com/shreekolape" },
+      { label: "LinkedIn", href: "https://www.linkedin.com/in/pranavkolape/" },
     ] satisfies SocialLink[],
   },
 } as const;

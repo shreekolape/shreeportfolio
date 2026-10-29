@@ -1,21 +1,19 @@
-"use client";
+﻿"use client";
 
-import { useRef, type RefObject } from "react";
+import { useRef } from "react";
 import { useFrame, type ThreeElements } from "@react-three/fiber";
 import * as THREE from "three";
-import { sceneState } from "@/lib/sceneStore";
-import { palette, render, type CharacterState } from "./sceneConfig";
-import { emptyPose, POSE_KEYS, poses } from "./poses";
+import { palette } from "./sceneConfig";
+import { RoundedBox } from "@react-three/drei";
+import { deskLegPositions, dims, lamp } from "./sceneDims";
+import { aimAt, placeSegment } from "./placeSegment";
 import { useScreenMaterial } from "./useScreenMaterial";
 import { accentColor } from "./accent";
+import { Character } from "./Character";
 
-// Simple primitive stand-in for the real GLB. Same state interface:
-// it reads sceneState.state and blends between the five poses.
+// Placeholder desk set + character, all built from sceneDims.
 
-const STATES = Object.keys(poses) as CharacterState[];
-const DESK_TOP = 0.775;
-const SEAT = 0.47;
-const FIGURE_Z = 0.86;
+const { desk, mat, keyboard, mouse, chair, monitor } = dims;
 
 function Clay({ color = palette.clay, ...props }: { color?: string } & ThreeElements["meshStandardMaterial"]) {
   return <meshStandardMaterial color={color} roughness={0.85} metalness={0} {...props} />;
@@ -32,230 +30,157 @@ function Desk() {
   return (
     <group>
       {/* Top + legs */}
-      <mesh position={[0, DESK_TOP - 0.025, 0]}>
-        <boxGeometry args={[1.6, 0.05, 0.72]} />
+      <mesh position={[0, desk.top - desk.thickness / 2, 0]}>
+        <boxGeometry args={[desk.width, desk.thickness, desk.depth]} />
         <Clay color={palette.desk} />
       </mesh>
-      {[-0.74, 0.74].map((x) =>
-        [-0.3, 0.3].map((z) => (
-          <mesh key={`${x}${z}`} position={[x, (DESK_TOP - 0.05) / 2, z]}>
-            <boxGeometry args={[0.05, DESK_TOP - 0.05, 0.05]} />
-            <Clay color={palette.deskLegs} />
-          </mesh>
-        )),
-      )}
+      {deskLegPositions.map((p) => (
+        <mesh key={p.join()} position={p}>
+          <boxGeometry args={[desk.legSize, desk.top - desk.thickness, desk.legSize]} />
+          <Clay color={palette.deskLegs} />
+        </mesh>
+      ))}
 
-      {/* Monitor */}
-      <group position={[0, DESK_TOP, -0.2]}>
-        <mesh position={[0, 0.008, 0]}>
-          <boxGeometry args={[0.22, 0.016, 0.14]} />
+      {/* Monitor: stand, panel, screen */}
+      <group position={[0, desk.top, monitor.z]}>
+        <mesh position={[0, monitor.standBase.height / 2, 0.01]}>
+          <boxGeometry args={[monitor.standBase.width, monitor.standBase.height, monitor.standBase.depth]} />
           <Clay color={palette.device} />
         </mesh>
-        <mesh position={[0, 0.14, -0.01]}>
-          <boxGeometry args={[0.04, 0.26, 0.03]} />
+        <mesh position={[0, monitor.lift / 2, -0.01]}>
+          <boxGeometry args={[0.04, monitor.lift + 0.04, 0.03]} />
           <Clay color={palette.device} />
         </mesh>
-        <mesh position={[0, 0.36, 0]}>
-          <boxGeometry args={[0.7, 0.43, 0.03]} />
+        <mesh position={[0, monitor.lift + monitor.height / 2, 0]}>
+          <boxGeometry args={[monitor.width, monitor.height, monitor.depth]} />
           <Clay color={palette.device} />
         </mesh>
-        <mesh position={[0, 0.365, 0.0155]} material={screen}>
-          <planeGeometry args={[0.66, 0.39]} />
+        <mesh position={[0, monitor.lift + monitor.height / 2, monitor.depth / 2 + 0.0005]} material={screen}>
+          <planeGeometry args={[monitor.width - 0.04, monitor.height - 0.04]} />
         </mesh>
       </group>
 
-      {/* Keyboard + mouse */}
-      <mesh position={[0, DESK_TOP + 0.01, 0.2]}>
-        <boxGeometry args={[0.44, 0.02, 0.14]} />
+      {/* Desk mat, keyboard, mouse */}
+      <mesh position={[mat.x, desk.top + mat.height / 2, mat.z]}>
+        <boxGeometry args={[mat.width, mat.height, mat.depth]} />
+        <Clay color="#1d1d21" />
+      </mesh>
+      <mesh position={[keyboard.x, dims.matTop + keyboard.height / 2, keyboard.z]}>
+        <boxGeometry args={[keyboard.width, keyboard.height, keyboard.depth]} />
         <Clay color={palette.device} />
       </mesh>
-      <mesh position={[0.33, DESK_TOP + 0.012, 0.22]} scale={[1, 0.55, 1.4]}>
-        <sphereGeometry args={[0.03, 16, 12]} />
+      <mesh position={[mouse.x, dims.matTop + mouse.height / 2, mouse.z]} scale={[1, 0.5, 1.6]}>
+        <sphereGeometry args={[mouse.width / 2, 16, 12]} />
         <Clay color={palette.device} />
       </mesh>
 
-      {/* Mug + books */}
-      <mesh position={[0.45, DESK_TOP + 0.05, 0.1]}>
+      {/* Mug + books (Part 3 replaces these with the full prop set) */}
+      <mesh position={[0.45, desk.top + 0.05, 0.05]}>
         <cylinderGeometry args={[0.04, 0.037, 0.1, 20]} />
         <Clay color={palette.object} />
       </mesh>
-      <mesh position={[-0.58, DESK_TOP + 0.02, -0.12]} rotation={[0, 0.2, 0]}>
+      <mesh position={[0.55, desk.top + 0.02, -0.14]} rotation={[0, 0.2, 0]}>
         <boxGeometry args={[0.26, 0.04, 0.19]} />
         <Clay color="#3d3b42" />
       </mesh>
-      <mesh position={[-0.57, DESK_TOP + 0.06, -0.12]} rotation={[0, -0.1, 0]}>
+      <mesh position={[0.56, desk.top + 0.06, -0.14]} rotation={[0, -0.1, 0]}>
         <boxGeometry args={[0.22, 0.04, 0.17]} />
         <Clay color={palette.object} />
       </mesh>
 
-      {/* Lamp (mirrored so it leans in from the right) */}
-      <group position={[0.62, DESK_TOP, -0.2]} scale={[-1, 1, 1]}>
-        <mesh position={[0, 0.012, 0]}>
-          <cylinderGeometry args={[0.08, 0.09, 0.024, 24]} />
+      {/* Lamp: left side of the desk, shade aimed at the keyboard. */}
+      <group>
+        <mesh position={[lamp.base[0], lamp.base[1] + 0.012, lamp.base[2]]}>
+          <cylinderGeometry args={[0.075, 0.085, 0.024, 24]} />
           <Clay color={palette.device} />
         </mesh>
-        <mesh position={[0.04, 0.22, 0.02]} rotation={[0, 0, -0.35]}>
-          <cylinderGeometry args={[0.012, 0.012, 0.44, 10]} />
+        <mesh ref={(m) => placeSegment(m, lamp.base, lamp.elbow, true)}>
+          <cylinderGeometry args={[0.011, 0.011, 1, 10]} />
           <Clay color={palette.device} />
         </mesh>
-        <mesh position={[0.15, 0.43, 0.05]} rotation={[0, 0, -1.9]}>
-          <cylinderGeometry args={[0.012, 0.012, 0.22, 10]} />
+        <mesh ref={(m) => placeSegment(m, lamp.elbow, lamp.head, true)}>
+          <cylinderGeometry args={[0.011, 0.011, 1, 10]} />
           <Clay color={palette.device} />
         </mesh>
-        <mesh position={[0.24, 0.39, 0.08]} rotation={[0, 0, 0.35]}>
-          <coneGeometry args={[0.08, 0.12, 24, 1, true]} />
-          <Clay color={palette.device} side={THREE.DoubleSide} />
+        <mesh position={lamp.elbow}>
+          <sphereGeometry args={[0.018, 12, 10]} />
+          <Clay color={palette.device} />
         </mesh>
-        <mesh position={[0.235, 0.345, 0.08]}>
-          <sphereGeometry args={[0.028, 16, 12]} />
-          <meshBasicMaterial ref={bulb} toneMapped={false} />
-        </mesh>
-      </group>
-    </group>
-  );
-}
-
-function Chair() {
-  return (
-    <group position={[0, 0, FIGURE_Z + 0.04]}>
-      <mesh position={[0, SEAT - 0.03, 0]}>
-        <boxGeometry args={[0.46, 0.06, 0.44]} />
-        <Clay color={palette.chair} />
-      </mesh>
-      <mesh position={[0, SEAT + 0.3, 0.24]} rotation={[0.12, 0, 0]}>
-        <boxGeometry args={[0.44, 0.52, 0.05]} />
-        <Clay color={palette.chair} />
-      </mesh>
-      <mesh position={[0, (SEAT - 0.06) / 2, 0]}>
-        <cylinderGeometry args={[0.025, 0.025, SEAT - 0.06, 10]} />
-        <Clay color={palette.deskLegs} />
-      </mesh>
-      <mesh position={[0, 0.02, 0]}>
-        <cylinderGeometry args={[0.24, 0.24, 0.03, 5]} />
-        <Clay color={palette.deskLegs} />
-      </mesh>
-    </group>
-  );
-}
-
-type Joint = RefObject<THREE.Group | null>;
-
-function Arm({ side, shoulder, elbow }: { side: 1 | -1; shoulder: Joint; elbow: Joint }) {
-  return (
-    <group ref={shoulder} position={[0.2 * side, 0.5, 0]}>
-      <mesh position={[0, -0.13, 0]}>
-        <capsuleGeometry args={[0.045, 0.18, 6, 12]} />
-        <Clay />
-      </mesh>
-      <group ref={elbow} position={[0, -0.27, 0]}>
-        <mesh position={[0, -0.12, 0]}>
-          <capsuleGeometry args={[0.04, 0.17, 6, 12]} />
-          <Clay />
-        </mesh>
-        <mesh position={[0, -0.26, 0]}>
-          <sphereGeometry args={[0.045, 14, 10]} />
-          <Clay />
-        </mesh>
-      </group>
-    </group>
-  );
-}
-
-function Figure() {
-  const yaw = useRef<THREE.Group>(null);
-  const torso = useRef<THREE.Group>(null);
-  const head = useRef<THREE.Group>(null);
-  const lShoulder = useRef<THREE.Group>(null);
-  const lElbow = useRef<THREE.Group>(null);
-  const rShoulder = useRef<THREE.Group>(null);
-  const rElbow = useRef<THREE.Group>(null);
-
-  // Blend weights per state; start fully in whatever state the page is in.
-  const weights = useRef<Record<CharacterState, number>>(
-    Object.fromEntries(STATES.map((s) => [s, s === sceneState.state ? 1 : 0])) as Record<CharacterState, number>,
-  );
-  const pose = useRef(emptyPose());
-
-  useFrame(({ clock }, delta) => {
-    const t = clock.elapsedTime;
-    const w = weights.current;
-    const k = 1 - Math.exp(-render.poseDamping * Math.min(delta, 0.1));
-
-    let total = 0;
-    for (const s of STATES) {
-      w[s] += ((s === sceneState.state ? 1 : 0) - w[s]) * k;
-      total += w[s];
-    }
-
-    const p = pose.current;
-    for (const key of POSE_KEYS) p[key] = 0;
-    for (const s of STATES) {
-      if (w[s] < 0.001) continue;
-      const sp = poses[s](t);
-      const f = w[s] / total;
-      for (const key of POSE_KEYS) p[key] += sp[key] * f;
-    }
-
-    yaw.current?.rotation.set(0, p.yaw, 0);
-    torso.current?.rotation.set(p.torso, 0, 0);
-    head.current?.rotation.set(p.head, p.headYaw, 0);
-    lShoulder.current?.rotation.set(p.lSx, 0, p.lSz);
-    lElbow.current?.rotation.set(p.lEx, 0, p.lEz);
-    rShoulder.current?.rotation.set(p.rSx, 0, p.rSz);
-    rElbow.current?.rotation.set(p.rEx, 0, p.rEz);
-  });
-
-  return (
-    <group position={[0, SEAT, FIGURE_Z]}>
-      {/* Legs stay put; the upper body turns and leans. */}
-      {[-0.1, 0.1].map((x) => (
-        <group key={x} position={[x, 0.02, 0]}>
-          <mesh position={[0, 0, -0.2]} rotation={[Math.PI / 2, 0, 0]}>
-            <capsuleGeometry args={[0.06, 0.32, 6, 12]} />
-            <Clay />
+        {/* Shade: local +y aims at the keyboard; the cone opens toward it. */}
+        <group ref={(g) => aimAt(g, lamp.head, lamp.aim)}>
+          <mesh rotation={[Math.PI, 0, 0]} position={[0, 0.02, 0]}>
+            <coneGeometry args={[0.07, 0.11, 24, 1, true]} />
+            <Clay color={palette.device} side={THREE.DoubleSide} />
           </mesh>
-          <mesh position={[0, -0.22, -0.4]}>
-            <capsuleGeometry args={[0.05, 0.36, 6, 12]} />
-            <Clay />
+          <mesh position={[0, 0.045, 0]}>
+            <sphereGeometry args={[0.024, 16, 12]} />
+            <meshBasicMaterial ref={bulb} toneMapped={false} />
           </mesh>
         </group>
-      ))}
+      </group>
+    </group>
+  );
+}
 
-      <group ref={yaw}>
-        <group ref={torso}>
-          <mesh position={[0, 0.07, 0]}>
-            <sphereGeometry args={[0.15, 18, 14]} />
-            <Clay />
-          </mesh>
-          <mesh position={[0, 0.3, 0]}>
-            <capsuleGeometry args={[0.16, 0.26, 8, 16]} />
-            <Clay />
-          </mesh>
-          <group ref={head} position={[0, 0.6, 0]}>
-            <mesh position={[0, 0.03, 0]}>
-              <cylinderGeometry args={[0.045, 0.05, 0.08, 12]} />
-              <Clay />
+/** Office chair: cushioned seat, backrest directly behind the sitter, five-star base. */
+function Chair() {
+  const backZ = chair.z + chair.backOffset + chair.backThickness / 2;
+  const seatY = chair.seatTop - chair.seatThickness / 2;
+  const columnTop = chair.seatTop - chair.seatThickness;
+  return (
+    <group>
+      <RoundedBox args={[chair.seatWidth, chair.seatThickness, chair.seatDepth]} radius={0.03} smoothness={4} position={[0, seatY, chair.z]}>
+        <Clay color={palette.chair} />
+      </RoundedBox>
+      <RoundedBox
+        args={[chair.seatWidth, chair.backHeight, chair.backThickness]}
+        radius={0.03}
+        smoothness={4}
+        position={[0, chair.seatTop + chair.backLift + chair.backHeight / 2, backZ]}
+      >
+        <Clay color={palette.chair} />
+      </RoundedBox>
+      {/* Spine bar joining the backrest to the seat */}
+      <mesh position={[0, chair.seatTop + chair.backLift / 2 - 0.02, backZ + 0.01]}>
+        <boxGeometry args={[0.07, chair.backLift + 0.08, 0.025]} />
+        <Clay color={palette.deskLegs} />
+      </mesh>
+      <mesh position={[0, chair.seatTop - chair.seatThickness - 0.01, backZ - 0.1]}>
+        <boxGeometry args={[0.07, 0.02, 0.22]} />
+        <Clay color={palette.deskLegs} />
+      </mesh>
+      {/* Gas lift + five-star base with casters */}
+      <mesh position={[0, (columnTop + 0.08) / 2, chair.z]}>
+        <cylinderGeometry args={[0.024, 0.03, columnTop - 0.08, 12]} />
+        <Clay color={palette.deskLegs} />
+      </mesh>
+      {Array.from({ length: 5 }, (_, i) => {
+        const a = (i / 5) * Math.PI * 2;
+        const tip: [number, number, number] = [Math.sin(a) * 0.3, 0.06, chair.z + Math.cos(a) * 0.3];
+        return (
+          <group key={i}>
+            <mesh ref={(m) => placeSegment(m, [0, 0.085, chair.z], tip, true)}>
+              <boxGeometry args={[0.035, 1, 0.025]} />
+              <Clay color={palette.deskLegs} />
             </mesh>
-            <mesh position={[0, 0.15, 0]}>
-              <sphereGeometry args={[0.12, 24, 18]} />
-              <Clay />
+            <mesh position={[tip[0], 0.025, tip[2]]}>
+              <sphereGeometry args={[0.025, 12, 10]} />
+              <Clay color={palette.device} />
             </mesh>
           </group>
-          <Arm side={-1} shoulder={lShoulder} elbow={lElbow} />
-          <Arm side={1} shoulder={rShoulder} elbow={rElbow} />
-        </group>
-      </group>
+        );
+      })}
     </group>
   );
 }
 
-/** Placeholder desk + character. Swap for <ModelDesk /> via sceneConfig.model.enabled. */
+/** Placeholder desk set + character. Swap for <ModelDesk /> via sceneConfig.model.enabled. */
 export function PlaceholderDesk() {
   return (
     <group>
       <Desk />
       <Chair />
-      <Figure />
+      <Character />
     </group>
   );
 }

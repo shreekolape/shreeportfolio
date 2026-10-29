@@ -9,11 +9,14 @@ import { model, palette, render, shots } from "./sceneConfig";
 import { PlaceholderDesk } from "./PlaceholderDesk";
 import { ModelDesk } from "./ModelDesk";
 import { accentColor, accentGlow } from "./accent";
+import { DebugBounds } from "./DebugBounds";
+import { dims, lamp as lampDims } from "./sceneDims";
 
 /** Monitor + lamp glow follow the live accent; intensity rises with scroll velocity. */
 function Lights() {
   const monitor = useRef<THREE.PointLight>(null);
   const lamp = useRef<THREE.PointLight>(null);
+  const rim = useRef<THREE.SpotLight>(null);
 
   useFrame(() => {
     const color = accentColor();
@@ -26,6 +29,10 @@ function Lights() {
       lamp.current.color.copy(color);
       lamp.current.intensity = 1.1 + glow * 1.4;
     }
+    if (rim.current) {
+      rim.current.color.copy(color);
+      rim.current.intensity = 5 + glow * 4;
+    }
   });
 
   return (
@@ -36,7 +43,17 @@ function Lights() {
       <directionalLight position={[-3, 4, 3]} intensity={0.95} color="#ece6dc" />
       <directionalLight position={[2.5, 2.5, -2.5]} intensity={0.6} color="#aab4ff" />
       <pointLight ref={monitor} position={[0, 1.15, 0.12]} distance={3} decay={1.6} />
-      <pointLight ref={lamp} position={[0.38, 1.08, -0.12]} distance={2.4} decay={1.6} />
+      <pointLight ref={lamp} position={lampDims.head} distance={2.4} decay={1.6} />
+      {/* Accent rim from behind-right so the black hoodie keeps its outline. */}
+      <spotLight
+        ref={rim}
+        position={[1.1, 1.9, 1.7]}
+        angle={0.55}
+        penumbra={0.8}
+        distance={5}
+        decay={1.4}
+        onUpdate={(l) => l.target.position.set(0, 0.95, dims.hips[2])}
+      />
     </>
   );
 }
@@ -106,6 +123,8 @@ function FirstFrame() {
 
 export default function SceneCanvas() {
   const start = shots[sceneState.shot];
+  // TEMPORARY debug toggle (?debug=bounds); removed before the final commit.
+  const debugBounds = new URLSearchParams(window.location.search).get("debug") === "bounds";
 
   return (
     <Canvas
@@ -128,6 +147,7 @@ export default function SceneCanvas() {
           <meshStandardMaterial color={palette.floor} roughness={1} />
         </mesh>
         <FirstFrame />
+        {debugBounds && <DebugBounds />}
       </Suspense>
     </Canvas>
   );
