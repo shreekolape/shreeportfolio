@@ -1,15 +1,17 @@
 ﻿"use client";
 
-import { forwardRef, useMemo } from "react";
+import { useMemo } from "react";
 import * as THREE from "three";
 import { dims } from "./sceneDims";
+import { placeSegment } from "./placeSegment";
 import { buildHair, buildHead } from "./meshes";
 
 // Stylised "clay" version of Shree: slim build, black hoodie with a glowing
-// </> print, thick wavy black hair, rectangular black glasses, light stubble.
-// The head, hair, hoodie, sleeves and legs are continuous sculpted/swept
-// meshes (see meshes.ts); only small appliqués (ears, brows, eyes, lips,
-// moustache) sit on top of the sculpted head.
+// </> print, thick wavy black hair, rectangular black glasses. The head,
+// hair, hoodie, sleeves and legs are continuous sculpted/swept meshes (see
+// meshes.ts). The face is deliberately minimal: a smooth oval with a defined
+// jaw and no sculpted nose/lips/brows/cheeks/ears/eyes; the beard and
+// moustache are a tint on the head material only (see meshes.buildHead).
 
 const C = dims.character;
 
@@ -18,12 +20,9 @@ const C = dims.character;
 const clay = (color: string, roughness = 0.82) => new THREE.MeshStandardMaterial({ color, roughness, metalness: 0 });
 
 export const looks = {
-  skin: clay("#9a6443", 0.72),
-  skinShadow: clay("#7d4f35", 0.8), // ears tone
-  facialHair: clay("#1d1612", 0.9),
-  features: clay("#1a1311", 0.6),
-  lips: clay("#6f3e2b", 0.7),
-  /** Vertex-coloured: skin + jaw/upper-lip stubble baked in (see meshes.buildHead). */
+  /** Neck, hands and thumb. */
+  skin: clay("#8d5a3b", 0.72),
+  /** Vertex-coloured: skin + beard/moustache tint baked in (see meshes.buildHead). */
   head: new THREE.MeshStandardMaterial({ vertexColors: true, roughness: 0.76, metalness: 0 }),
   /** Vertex-coloured: base + highlight on the raised curls (see meshes.buildHair). */
   hair: new THREE.MeshStandardMaterial({ vertexColors: true, roughness: 0.56, metalness: 0 }),
@@ -45,30 +44,6 @@ export const looks = {
   /** Chest print: colour + emissive follow the live accent (set per frame). */
   print: new THREE.MeshStandardMaterial({ color: "#7fe3ee", emissive: "#7fe3ee", emissiveIntensity: 0.6, roughness: 0.6 }),
 };
-
-const unitSphere = new THREE.SphereGeometry(1, 24, 18);
-
-function Blob({
-  radii,
-  position,
-  rotation,
-  material,
-}: {
-  radii: readonly number[];
-  position?: readonly number[];
-  rotation?: readonly number[];
-  material: THREE.Material;
-}) {
-  return (
-    <mesh
-      geometry={unitSphere}
-      material={material}
-      scale={radii as [number, number, number]}
-      position={position as [number, number, number] | undefined}
-      rotation={rotation as [number, number, number] | undefined}
-    />
-  );
-}
 
 // ------------------------------------------------------------------ glasses
 
@@ -107,12 +82,29 @@ function rectRing(w: number, h: number, border: number, r: number) {
 const LENS_W = 0.046;
 const LENS_H = 0.032;
 const LENS_X = 0.033;
+const TEMPLE_R = 0.0028;
 
-/** Medium rectangular black frames, sitting on the nose and running back to the ears. */
+/**
+ * Temple-arm path from the lens hinge back over the side of the head,
+ * following its curve (ellipse in x/z at a roughly constant height) rather
+ * than running straight back.
+ */
+function templePoints(sx: -1 | 1, hinge: THREE.Vector3): THREE.Vector3[] {
+  const [hx, , hz] = C.head;
+  return [
+    hinge,
+    new THREE.Vector3(sx * hx * 0.97, hinge.y + 0.002, -hz * 0.55),
+    new THREE.Vector3(sx * hx * 1.03, hinge.y - 0.002, -hz * 0.05),
+    new THREE.Vector3(sx * hx * 0.95, hinge.y - 0.009, hz * 0.3),
+  ];
+}
+
+/** Medium rectangular black frames at eye level; temples wrap back over the head's curve. */
 function Glasses() {
   const ring = useMemo(() => rectRing(LENS_W, LENS_H, 0.0045, 0.006), []);
   const [ox, oy, oz] = C.glasses.offset;
   const outer = LENS_X + LENS_W / 2 + 0.0045;
+
   return (
     <group position={[ox, oy, oz]}>
       {[-1, 1].map((sx) => (
@@ -127,16 +119,17 @@ function Glasses() {
       <mesh position={[0, 0.004, 0]} material={looks.frame}>
         <boxGeometry args={[LENS_X * 2 - LENS_W - 0.006, 0.004, 0.004]} />
       </mesh>
-      {/* Temples run back to the ears, just outside the head. */}
-      {[-1, 1].map((sx) => {
-        const a = new THREE.Vector3(sx * outer, 0.006, 0.002);
-        const b = new THREE.Vector3(sx * (C.head[0] + 0.006), -0.002, -oz - 0.004);
-        const dir = b.clone().sub(a);
-        const q = new THREE.Quaternion().setFromUnitVectors(new THREE.Vector3(0, 0, 1), dir.clone().normalize());
+      {/* Temples: each a short curved wrap, built from thin cylinder segments. */}
+      {([-1, 1] as const).map((sx) => {
+        const pts = templePoints(sx, new THREE.Vector3(sx * outer, 0.006, 0.002));
         return (
-          <mesh key={`t${sx}`} material={looks.frame} position={a.clone().addScaledVector(dir, 0.5)} quaternion={q}>
-            <boxGeometry args={[0.003, 0.005, dir.length()]} />
-          </mesh>
+          <group key={`t${sx}`}>
+            {pts.slice(1).map((p, i) => (
+              <mesh key={i} ref={(m) => placeSegment(m, pts[i], p)} material={looks.frame}>
+                <cylinderGeometry args={[TEMPLE_R, TEMPLE_R, pts[i].distanceTo(p), 6]} />
+              </mesh>
+            ))}
+          </group>
         );
       })}
     </group>
@@ -146,57 +139,29 @@ function Glasses() {
 // ------------------------------------------------------------------ head
 
 /**
- * Head in its own frame (origin at the neck base, +y up the head, face at -z).
- * The skull, face relief (jaw, nose, brow, cheeks) and chin/lip stubble are one
- * sculpted mesh (meshes.buildHead); hair is one displaced shell (meshes.buildHair).
- * Only small appliqués sit on top: ears, brows, eyes (closable via `eyesRef`),
- * lips and a thin moustache.
+ * Head in its own frame (origin at the neck base, +y up the head, face at
+ * -z): a short slim neck, the minimal sculpted oval head, the hair shell and
+ * the glasses. No separate facial appliqués.
  */
-export const Head = forwardRef<THREE.Group>(function Head(_, eyesRef) {
+export function Head() {
   const headGeo = useMemo(() => buildHead(), []);
   const hairGeo = useMemo(() => buildHair(), []);
-  const [hx, , hz] = C.head;
   const cy = C.headCenterAlong;
   return (
     <group>
-      {/* Neck (partly covered by the hood roll, see Character.tsx) */}
+      {/* Short, slim neck — the hood roll (see Character.tsx) covers most of it. */}
       <mesh position={[0, C.neckLength / 2, 0]} material={looks.skin}>
-        <cylinderGeometry args={[C.neckRadius * 0.92, C.neckRadius, C.neckLength + 0.05, 16]} />
+        <cylinderGeometry args={[C.neckRadius * 0.94, C.neckRadius, C.neckLength + 0.03, 16]} />
       </mesh>
 
       <group position={[0, cy, 0]}>
         <mesh geometry={headGeo} material={looks.head} />
         <mesh geometry={hairGeo} material={looks.hair} />
-
-        {/* Ears */}
-        {[-1, 1].map((sx) => (
-          <Blob key={sx} radii={[0.011, 0.028, 0.019]} position={[sx * hx * 0.97, -0.01, 0.004]} material={looks.skinShadow} />
-        ))}
-        {/* Thin moustache, just above the lip */}
-        <mesh position={[0, -0.03, -hz * 0.975]} rotation={[0, 0, Math.PI / 2]} material={looks.facialHair}>
-          <capsuleGeometry args={[0.0038, 0.03, 4, 8]} />
-        </mesh>
-        {/* Lips */}
-        <mesh position={[0, -0.046, -hz * 0.95]} rotation={[0, 0, Math.PI / 2]} material={looks.lips}>
-          <capsuleGeometry args={[0.0036, 0.024, 4, 8]} />
-        </mesh>
-        {/* Brows */}
-        {[-1, 1].map((sx) => (
-          <mesh key={`b${sx}`} position={[sx * 0.032, 0.046, -hz * 0.9]} rotation={[0, 0, Math.PI / 2 + sx * 0.08]} material={looks.features}>
-            <capsuleGeometry args={[0.0033, 0.022, 4, 8]} />
-          </mesh>
-        ))}
-        {/* Eyes (scaled flat to close them: sleep, blinks) */}
-        <group ref={eyesRef} position={[0, 0.018, -hz * 0.9]}>
-          {[-1, 1].map((sx) => (
-            <Blob key={sx} radii={[0.0082, 0.0072, 0.005]} position={[sx * 0.031, 0, 0]} material={looks.features} />
-          ))}
-        </group>
         <Glasses />
       </group>
     </group>
   );
-});
+}
 
 // ------------------------------------------------------------------ chest print
 

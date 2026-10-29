@@ -33,68 +33,51 @@ export const rigDebug: { latest: Solved | null } = { latest: null };
 
 // ------------------------------------------------------------------ hand
 
-// Box dims [width across the knuckles, length along the hand, thickness].
-// Lengths are stretched ~25% past their joint-to-joint span so neighbouring
-// segments overlap at the seam instead of only touching edge to edge.
-const SEAM_OVERLAP = 1.25;
-const PALM_SIZE: [number, number, number] = [0.066, FINGER.knuckle * SEAM_OVERLAP, 0.024];
-const FINGER_PROX_SIZE: [number, number, number] = [0.054, FINGER.proximal * SEAM_OVERLAP, 0.017];
-const FINGER_DIST_SIZE: [number, number, number] = [0.046, FINGER.distal * SEAM_OVERLAP, 0.013];
+// Simple rounded mitten: a palm, one merged-fingers lump (no separate
+// knuckle joints), and a thumb — all capsules, always overlapping their
+// neighbour so the hand reads as one piece attached to the sleeve cuff.
+const PALM_RADIUS = 0.027;
+const PALM_LENGTH = FINGER.knuckle * 1.3; // wrist → knuckle, with cuff overlap
+const FINGERS_RADIUS = 0.023;
+const FINGERS_LENGTH = (FINGER.proximal + FINGER.distal) * 1.15; // knuckle → fingertip, open-hand span
 const THUMB_RADIUS = 0.011;
 const THUMB_LENGTH = 0.05;
 
-/** Hand: a palm box and one grouped-fingers paddle (two curling segments), plus a thumb. */
 function Hand({ handRef }: { handRef: Ref<THREE.Group> }) {
   return (
     <group ref={handRef}>
       <mesh material={looks.skin}>
-        <boxGeometry args={PALM_SIZE} />
+        <capsuleGeometry args={[PALM_RADIUS, Math.max(0.001, PALM_LENGTH - PALM_RADIUS * 2), 4, 10]} />
       </mesh>
       <mesh material={looks.skin}>
-        <boxGeometry args={FINGER_PROX_SIZE} />
+        <capsuleGeometry args={[FINGERS_RADIUS, Math.max(0.001, FINGERS_LENGTH - FINGERS_RADIUS * 2), 4, 10]} />
       </mesh>
       <mesh material={looks.skin}>
-        <boxGeometry args={FINGER_DIST_SIZE} />
-      </mesh>
-      <mesh material={looks.skin}>
-        <capsuleGeometry args={[THUMB_RADIUS, THUMB_LENGTH - THUMB_RADIUS * 2, 4, 8]} />
+        <capsuleGeometry args={[THUMB_RADIUS, Math.max(0.001, THUMB_LENGTH - THUMB_RADIUS * 2), 4, 8]} />
       </mesh>
     </group>
   );
 }
 
-const boxBasis = new THREE.Matrix4();
-const dirV = new THREE.Vector3();
 const acrossV = new THREE.Vector3();
-const thickV = new THREE.Vector3();
-const midV = new THREE.Vector3();
-
-/** Orients a box along a→b (local Y), using `handQ`'s local X as the stable "across" axis (no twist as fingers curl). */
-function placeFingerBox(mesh: THREE.Object3D | undefined, a: THREE.Vector3, b: THREE.Vector3, handQ: THREE.Quaternion) {
-  if (!mesh) return;
-  dirV.copy(b).sub(a).normalize();
-  acrossV.set(1, 0, 0).applyQuaternion(handQ);
-  thickV.crossVectors(acrossV, dirV).normalize();
-  acrossV.crossVectors(dirV, thickV).normalize();
-  mesh.position.copy(a).add(b).multiplyScalar(0.5);
-  mesh.quaternion.setFromRotationMatrix(boxBasis.makeBasis(acrossV, dirV, thickV));
-}
+const backV = new THREE.Vector3();
+const baseV = new THREE.Vector3();
+const tipV = new THREE.Vector3();
 
 function applyHand(group: THREE.Group | null, j: ArmJoints, side: -1 | 1) {
   if (!group) return;
-  const [palm, fingerProx, fingerDist, thumb] = group.children;
+  const [palm, fingers, thumb] = group.children;
 
-  palm.position.copy(midV.copy(j.wrist).add(j.knuckle).multiplyScalar(0.5));
-  palm.quaternion.copy(j.handQ);
-
-  placeFingerBox(fingerProx, j.knuckle, j.fingerMid, j.handQ);
-  placeFingerBox(fingerDist, j.fingerMid, j.fingertip, j.handQ);
+  // Capsules are rotationally symmetric, so a simple a→b placement (no twist
+  // bookkeeping needed) is enough for the palm and the merged-fingers lump.
+  placeSegment(palm, j.wrist, j.knuckle);
+  placeSegment(fingers, j.knuckle, j.fingertip);
 
   // Thumb: short, angled out from the base of the palm on the inner side.
   const across = acrossV.set(1, 0, 0).applyQuaternion(j.handQ);
-  const back = thickV.set(0, 0, 1).applyQuaternion(j.handQ);
-  const base = dirV.copy(j.wrist).addScaledVector(j.handDir, 0.014).addScaledVector(across, -side * 0.024);
-  const tip = midV
+  const back = backV.set(0, 0, 1).applyQuaternion(j.handQ);
+  const base = baseV.copy(j.wrist).addScaledVector(j.handDir, 0.014).addScaledVector(across, -side * 0.024);
+  const tip = tipV
     .copy(base)
     .addScaledVector(j.handDir, THUMB_LENGTH * 0.62)
     .addScaledVector(across, -side * THUMB_LENGTH * 0.62)
@@ -130,12 +113,10 @@ export function Character() {
   const legGeos = useMemo(() => legs.map((leg) => buildLeg(leg.hip, leg.knee, leg.ankle)), []);
 
   const head = useRef<THREE.Group>(null);
-  const eyes = useRef<THREE.Group>(null);
   const hood = useRef<THREE.Group>(null);
   const print = useRef<THREE.Group>(null);
   const left = useRef<THREE.Group>(null);
   const right = useRef<THREE.Group>(null);
-  const nextBlink = useRef(2.5);
 
   const weights = useRef<Record<CharacterState, number>>(
     Object.fromEntries(STATES.map((s) => [s, s === sceneState.state ? 1 : 0])) as Record<CharacterState, number>,
@@ -172,12 +153,6 @@ export function Character() {
     applyHand(left.current, s.l, -1);
     applyHand(right.current, s.r, 1);
 
-    // Eyes: closed while asleep, otherwise an occasional quick blink.
-    if (t > nextBlink.current + 0.14) nextBlink.current = t + 2.5 + Math.random() * 3.5;
-    const blinking = t > nextBlink.current;
-    const open = blinking ? 0.12 : 1 - w.sleep * 0.88;
-    eyes.current?.scale.set(1, Math.max(0.12, open), 1);
-
     // </> print glows softly in the live accent.
     looks.print.color.copy(accentColor());
     looks.print.emissive.copy(accentColor());
@@ -207,7 +182,7 @@ export function Character() {
 
       {/* Head pivots at the neck. */}
       <group ref={head}>
-        <Head ref={eyes} />
+        <Head />
       </group>
 
       <Hand handRef={left} />

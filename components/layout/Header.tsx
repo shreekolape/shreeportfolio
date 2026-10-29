@@ -11,6 +11,7 @@ function isActive(pathname: string, href: string) {
 
 export function Header() {
   const { pathname } = usePageTransition();
+  if (pathname.startsWith("/dev")) return null;
 
   return (
     <header className="fixed inset-x-0 top-0 z-50 h-[var(--header-h)] bg-gradient-to-b from-bg via-bg/80 to-transparent">

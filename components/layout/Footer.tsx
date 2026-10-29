@@ -1,3 +1,6 @@
+"use client";
+
+import { usePathname } from "next/navigation";
 import { site } from "@/content/site";
 import { Magnetic } from "@/components/ui/Magnetic";
 import { SmartLink } from "@/components/ui/SmartLink";
@@ -9,6 +12,8 @@ const linkClass = "link-underline text-muted transition-colors hover:text-accent
 /** Shared footer CTA, on every page. `data-scene="footer"` is the 3D wave trigger (Phase 4). */
 export function Footer() {
   const { footer, contact } = site;
+  const pathname = usePathname();
+  if (pathname.startsWith("/dev")) return null;
 
   return (
     <footer data-scene="footer" className="relative border-t border-line">

@@ -156,11 +156,12 @@ export function buildHoodRoll() {
   const rings = 34;
   const segs = 18;
   const geo = createSweepGeometry(rings, segs);
-  const y0 = C.upperSpine - 0.012;
+  // Raised almost to the neck base (and bulked up below) so it covers most of a short neck.
+  const y0 = C.upperSpine - 0.002;
   const span = 1.85; // radians each side of the back
   const path = (u: number, out: THREE.Vector3) => {
     const a = (u * 2 - 1) * span;
-    return out.set(0.092 * Math.sin(a), y0 + 0.012 * Math.cos(a), 0.072 * Math.cos(a) + 0.006);
+    return out.set(0.096 * Math.sin(a), y0 + 0.014 * Math.cos(a), 0.075 * Math.cos(a) + 0.006);
   };
   const p = new THREE.Vector3();
   const p2 = new THREE.Vector3();
@@ -179,7 +180,7 @@ export function buildHoodRoll() {
     normal.crossVectors(binormal, tangent).normalize();
     // Thick at the back, tapering toward the front; soft fabric wrinkles.
     const across = Math.cos(((u * 2 - 1) * Math.PI) / 2);
-    const rad = (0.014 + 0.036 * across ** 1.3) * (1 + 0.08 * Math.sin(u * 40) * across);
+    const rad = (0.016 + 0.044 * across ** 1.3) * (1 + 0.08 * Math.sin(u * 40) * across);
     // Flattened against the body (wider outward than upward).
     out
       .copy(p)
@@ -367,13 +368,14 @@ export function buildShoe() {
 
 // ------------------------------------------------------------------ head + hair
 
-const SKIN = new THREE.Color("#9a6443");
-const STUBBLE = new THREE.Color("#5f4231");
+const SKIN = new THREE.Color("#8d5a3b");
+const STUBBLE = new THREE.Color("#5a3d2a");
 
 /**
- * Sculpted head in its own frame (centre at origin, +y up, face at -z):
- * long slim oval, defined jawline, nose with a bridge, brow, chin; light
- * stubble painted into the vertex colours.
+ * Minimal head in its own frame (centre at origin, +y up, face at -z): a
+ * smooth, slightly long oval with a defined jaw and no other facial relief
+ * (no nose, lips, brows, cheeks, ears or eyes). The beard/moustache are a
+ * subtle darker tint baked into the vertex colours, not geometry.
  */
 export function buildHead() {
   const [hx, hy, hz] = C.head;
@@ -386,28 +388,17 @@ export function buildHead() {
     v.fromBufferAttribute(pos, i);
     const { y } = v;
     let { x, z } = v;
-    const front = Math.max(0, -z);
-    const ax = Math.abs(x);
     // Jaw: narrow the lower head, with a firmer line under the cheeks.
     x *= 1 - 0.26 * smooth(-0.15, -1, y) - 0.1 * smooth(-0.45, -0.9, y);
     z *= 1 - 0.08 * smooth(-0.3, -1, y) * (z > 0 ? 1 : 0);
-    // Chin forward a touch, forehead slightly flatter.
-    z -= 0.06 * Math.exp(-((x / 0.22) ** 2 + ((y + 0.82) / 0.16) ** 2)) * front;
-    if (z < 0 && y > 0.25) z *= 0.97;
-    // Nose: bridge from between the eyes down to the tip.
-    const nose = Math.exp(-((x / 0.11) ** 2 + ((y + 0.12) / 0.27) ** 2)) * front ** 4;
-    z -= 0.2 * nose * (0.55 + 0.45 * smooth(0.15, -0.3, y));
-    // Brow ridge, eye sockets, cheekbones, mouth line.
-    z -= 0.035 * Math.exp(-(((y - 0.3) / 0.09) ** 2)) * smooth(0.05, 0.5, ax) * (1 - smooth(0.6, 0.85, ax)) * front;
-    z += 0.05 * Math.exp(-(((ax - 0.37) / 0.13) ** 2 + ((y - 0.13) / 0.1) ** 2)) * front;
-    x += Math.sign(x) * 0.025 * Math.exp(-(((ax - 0.55) / 0.2) ** 2 + ((y + 0.12) / 0.18) ** 2)) * front;
-    z += 0.018 * Math.exp(-((x / 0.24) ** 2 + ((y + 0.44) / 0.03) ** 2)) * front;
     pos.setXYZ(i, x * hx, y * hy, z * hz);
 
-    // Light stubble on the chin/jaw and upper lip, darker toward the chin.
-    const jaw = smooth(-0.42, -0.72, v.y) * smooth(0.55, -0.2, v.z);
-    const lip = Math.exp(-((v.x / 0.28) ** 2 + ((v.y + 0.34) / 0.05) ** 2)) * front;
-    col.copy(SKIN).lerp(STUBBLE, Math.min(0.62, jaw * 0.6 + lip * 0.25));
+    // Beard + moustache: a soft darker tint over the lower face/jaw and the
+    // upper-lip band, never sculpted — just colour.
+    const front = Math.max(0, -z);
+    const beard = smooth(-0.3, -0.72, v.y) * smooth(0.6, -0.3, v.z);
+    const moustache = Math.exp(-((v.x / 0.3) ** 2 + ((v.y + 0.3) / 0.07) ** 2)) * front;
+    col.copy(SKIN).lerp(STUBBLE, Math.min(0.55, beard * 0.55 + moustache * 0.35));
     colors[i * 3] = col.r;
     colors[i * 3 + 1] = col.g;
     colors[i * 3 + 2] = col.b;

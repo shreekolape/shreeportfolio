@@ -72,8 +72,8 @@ const character = {
   waist: { at: 0.03, radii: [0.145, 0.13, 0.1] as Vec3 },
   chest: [0.163, 0.16, 0.105] as Vec3,
   deltoidRadius: 0.055,
-  neckLength: 0.07,
-  neckRadius: 0.052,
+  neckLength: 0.048,
+  neckRadius: 0.04,
   /** Head ellipsoid radii (x width, y height, z depth): 0.25 m tall. */
   head: [0.085, 0.125, 0.102] as Vec3,
   /** Neck base → head centre, along the head's up axis. */
@@ -82,7 +82,7 @@ const character = {
   hairCap: { offset: [0, 0.04, 0.008] as Vec3, radii: [0.104, 0.126, 0.126] as Vec3 },
   glasses: { offset: [0, 0.015, -0.11] as Vec3, radii: [0.072, 0.027, 0.014] as Vec3 },
   /** Hood lying down: a roll around the back of the neck, in the upper-spine frame. */
-  hood: { offset: [0, 0.305, 0.06] as Vec3, radii: [0.135, 0.07, 0.075] as Vec3 },
+  hood: { offset: [0, 0.312, 0.06] as Vec3, radii: [0.145, 0.078, 0.082] as Vec3 },
   upperArm: 0.29,
   forearm: 0.26,
   /** Collision radii match the slightly baggy sleeves. */

@@ -108,9 +108,11 @@ export const poses: Record<CharacterState, (t: number) => Pose> = {
     l: { wrist: [-0.2, restOnDesk, 0.3], pole: [-0.7, -1, 0.3] },
     r: { wrist: [0.2, restOnDesk, 0.3], pole: [0.7, -1, 0.3] },
   }),
-  // Leaning back, turned toward the camera (-x), waving with the near (left) hand.
+  // Leaning back, turned toward the camera (-x). Left elbow bent ~90° (wrist
+  // distance from the shoulder ≈ upperArm/forearm's Pythagorean length), hand
+  // raised to head height, swaying gently side to side. Right hand rests on the lap.
   wave: (t) => {
-    const swing = Math.sin(t * 7) * 0.07;
+    const swing = Math.sin(t * 3.2) * 0.05;
     return {
       yaw: 0.42,
       lean: -0.1,
@@ -120,7 +122,7 @@ export const poses: Record<CharacterState, (t: number) => Pose> = {
       headRoll: 0,
       handFlat: 0,
       curl: 0,
-      l: { wrist: [-0.45 + swing, shoulderY + 0.36, hipZ - 0.05], pole: [-1, -1, 0] },
+      l: { wrist: [-0.46 + swing, shoulderY + 0.23, hipZ - 0.14], pole: [-1, -0.5, 0.15] },
       r: { wrist: [0.13, hipY + 0.11, hipZ - 0.2], pole: [1, -0.3, 0.5] },
     };
   },
