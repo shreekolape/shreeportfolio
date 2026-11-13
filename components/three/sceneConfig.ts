@@ -1,7 +1,7 @@
 // Everything needed to swap the placeholder scene for the real GLB lives here.
 
-export type CharacterState = "sleep" | "wake" | "type" | "idle" | "wave";
-export type Shot = "hero" | "intro" | "work" | "orbit" | "footer";
+export type CharacterState = "sleep" | "wake" | "type" | "idle" | "wave" | "relax" | "phone";
+export type Shot = "hero" | "intro" | "work" | "orbit" | "footer" | "about" | "contact";
 export type Vec3 = [number, number, number];
 
 /** Home sections (`data-scene="…"`) → character state + camera shot. */
@@ -31,6 +31,8 @@ export const model = {
     type: "type",
     idle: "idle",
     wave: "wave",
+    relax: "relax",
+    phone: "phone",
   } satisfies Record<CharacterState, string>,
   screenMeshName: "Screen",
   /** Seconds to crossfade between animation clips. */
@@ -49,6 +51,10 @@ export const shots: Record<Shot, { position: Vec3; target: Vec3; shift: number }
   work: { position: [-1.15, 1.62, 2.45], target: [0.05, 1.1, -0.15], shift: 0.2 },
   orbit: { position: [-2.85, 1.75, 1.55], target: [0, 0.95, 0.3], shift: 0.17 },
   footer: { position: [-2.6, 1.5, 1.75], target: [0, 1.05, 0.7], shift: 0.14 },
+  // Small close-ups for About (relax) and Contact (phone): tighter, centred on the
+  // upper body/head rather than the whole desk.
+  about: { position: [-1.05, 1.55, 1.35], target: [-0.05, 1.2, 0.55], shift: 0.1 },
+  contact: { position: [-0.95, 1.45, 1.2], target: [0, 1.12, 0.5], shift: 0.1 },
 };
 
 export const render = {

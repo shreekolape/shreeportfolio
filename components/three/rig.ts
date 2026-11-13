@@ -126,6 +126,41 @@ export const poses: Record<CharacterState, (t: number) => Pose> = {
       r: { wrist: [0.13, hipY + 0.11, hipZ - 0.2], pole: [1, -0.3, 0.5] },
     };
   },
+  // About close-up: leaning back, relaxed, turned toward the camera. Both
+  // hands resting at the sides (same verified-clear resting spot as wave's
+  // right arm), open/loose fingers.
+  relax: (t) => {
+    const breathe = Math.sin(t * 0.8) * 0.015;
+    return {
+      yaw: 0.3,
+      lean: -0.15 + breathe,
+      hunch: -0.08,
+      headPitch: -0.08,
+      headYaw: 0.22,
+      headRoll: 0.04,
+      handFlat: 0.3,
+      curl: 0.2,
+      l: { wrist: [-0.15, hipY + 0.17, hipZ - 0.18], pole: [-1, -0.3, 0.5] },
+      r: { wrist: [0.15, hipY + 0.17, hipZ - 0.18], pole: [1, -0.3, 0.5] },
+    };
+  },
+  // Contact close-up: leaning in slightly, looking down at the phone held in
+  // the right hand at chest height; left hand rests at the side.
+  phone: (t) => {
+    const glanceUp = Math.sin(t * 0.6) * 0.03;
+    return {
+      yaw: 0.12,
+      lean: 0.1,
+      hunch: 0.12,
+      headPitch: 0.3 + glanceUp,
+      headYaw: 0.14,
+      headRoll: 0,
+      handFlat: 0.45,
+      curl: 0.7,
+      l: { wrist: [-0.16, hipY + 0.17, hipZ - 0.18], pole: [-1, -0.3, 0.4] },
+      r: { wrist: [0.13, shoulderY - 0.1, hipZ - 0.06], pole: [0.4, -1, 0.5] },
+    };
+  },
 };
 
 export const STATES = Object.keys(poses) as CharacterState[];
@@ -545,32 +580,46 @@ export function findViolations(s: Solved, tolerance = 0.002): Violation[] {
 }
 
 /**
- * Sweeps every state over time and every state-to-state transition at many
- * blend points; returns the worst intersections found.
+ * Which registered poses can actually blend into one another on the live
+ * site. Home's five states continuously cross-fade by scroll; About's
+ * `relax` and Contact's `phone` are each the only state ever set on their
+ * own, separately-mounted scene, so they only ever need to be checked
+ * against themselves over time, never against a pose from another route.
  */
-export function sweepAll(extraStates: Array<[string, (t: number) => Pose]> = []) {
-  const all: Array<[string, (t: number) => Pose]> = [
-    ...(Object.entries(poses) as Array<[string, (t: number) => Pose]>),
-    ...extraStates,
-  ];
+export const REACHABLE_GROUPS: CharacterState[][] = [
+  ["sleep", "wake", "type", "idle", "wave"],
+  ["relax"],
+  ["phone"],
+];
+
+/**
+ * Sweeps every state over time (self-consistency), plus every state-to-state
+ * transition within the same reachable group (see REACHABLE_GROUPS) at many
+ * blend points. Pairs that can never actually occur in the live UI — poses
+ * belonging to different, separately-mounted routes — are intentionally not
+ * cross-checked; returns the worst intersections found.
+ */
+export function sweepAll(groups: CharacterState[][] = REACHABLE_GROUPS) {
   const issues: Array<Violation & { at: string }> = [];
   const record = (at: string, s: Solved) => {
     for (const v of findViolations(s)) issues.push({ ...v, at });
   };
   let checks = 0;
-  for (const [name, fn] of all) {
+  for (const name of groups.flat()) {
     for (let t = 0; t < 6; t += 0.05) {
-      record(`${name} t=${t.toFixed(2)}`, solve(fn(t)));
+      record(`${name} t=${t.toFixed(2)}`, solve(poses[name](t)));
       checks++;
     }
   }
-  for (const [a, fa] of all) {
-    for (const [b, fb] of all) {
-      if (a === b) continue;
-      for (let w = 0; w <= 1.0001; w += 0.05) {
-        for (const t of [0, 0.7, 1.9, 3.3]) {
-          record(`${a}→${b} w=${w.toFixed(2)} t=${t}`, solve(blendPoses([[fa(t), 1 - w], [fb(t), w]])));
-          checks++;
+  for (const group of groups) {
+    for (const a of group) {
+      for (const b of group) {
+        if (a === b) continue;
+        for (let w = 0; w <= 1.0001; w += 0.05) {
+          for (const t of [0, 0.7, 1.9, 3.3]) {
+            record(`${a}→${b} w=${w.toFixed(2)} t=${t}`, solve(blendPoses([[poses[a](t), 1 - w], [poses[b](t), w]])));
+            checks++;
+          }
         }
       }
     }

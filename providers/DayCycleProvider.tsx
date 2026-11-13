@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, type ReactNode } from "react";
+import { useEffect, useState, type ReactNode } from "react";
 import { gsap } from "@/lib/gsap";
 import { BG_TINT_STOPS, sampleHexStops, SECTION_DAY_T } from "@/lib/dayCycle";
 import { useLenis } from "./SmoothScrollProvider";
@@ -9,6 +9,21 @@ import { usePageTransition } from "./TransitionProvider";
 /** Live time-of-day (0–1): midnight → sunrise → day → evening → midnight. Only
  *  this provider writes it on Home; fixed-theme pages set it directly (B3). */
 export const liveDayCycle = { t: 0 };
+
+/**
+ * Pins the day cycle and page tint to a fixed point, synchronously during
+ * this component's first render — before any child (e.g. a 3D scene) can
+ * read `liveDayCycle.t`. For pages with one fixed lighting theme instead of
+ * a scroll-driven cycle: About's golden hour, Contact's night, Work's
+ * "working hours". Like `useSceneReset`, a `useEffect` would run too late.
+ */
+export function useFixedDayTheme(t: number, bg: string): void {
+  useState(() => {
+    liveDayCycle.t = t;
+    document.documentElement.style.setProperty("--bg", bg);
+    return null;
+  });
+}
 
 const clamp01 = (n: number) => Math.min(1, Math.max(0, n));
 

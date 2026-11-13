@@ -7,12 +7,24 @@ import { setSceneLoad, setSceneTarget } from "@/lib/sceneStore";
 import { useMotionPrefs } from "@/providers/MotionPrefsProvider";
 import { usePageTransition } from "@/providers/TransitionProvider";
 import { sectionStates } from "./sceneConfig";
+import { useSceneReset } from "./useSceneReset";
 
 // three.js + R3F live in their own chunk, fetched only when the scene is allowed.
 const SceneCanvas = dynamic(() => import("./SceneCanvas"), { ssr: false });
 
+/**
+ * Mounts fresh every time Home's canvas becomes active, so the synchronous
+ * reset below always runs before `Character` ever reads `sceneState` — no
+ * stale pose (e.g. "wave" left over from a previous visit to the footer, or
+ * a fixed pose from About/Contact) can blend in for a frame.
+ */
+function HomeScene() {
+  useSceneReset("sleep", "hero");
+  return <SceneCanvas />;
+}
+
 /** If WebGL fails, drop the canvas and show the static fallbacks instead. */
-class SceneErrorBoundary extends Component<{ children: ReactNode }, { failed: boolean }> {
+export class SceneErrorBoundary extends Component<{ children: ReactNode }, { failed: boolean }> {
   state = { failed: false };
   static getDerivedStateFromError() {
     return { failed: true };
@@ -51,7 +63,6 @@ export function SceneLayer() {
   useGSAP(
     () => {
       if (!active) return;
-      setSceneTarget("sleep", "hero");
       document.querySelectorAll<HTMLElement>("[data-scene]").forEach((el) => {
         const entry = sectionStates[el.dataset.scene ?? ""];
         if (!entry) return;
@@ -71,7 +82,7 @@ export function SceneLayer() {
   return (
     <div aria-hidden="true" className="pointer-events-none fixed inset-0 -z-10">
       <SceneErrorBoundary>
-        <SceneCanvas />
+        <HomeScene />
       </SceneErrorBoundary>
       {/* Scrim keeps text readable over the scene; content sits left, scene right. */}
       <div className="absolute inset-0 bg-[linear-gradient(90deg,var(--bg)_0%,rgb(10_10_11/0.82)_32%,rgb(10_10_11/0.25)_62%,transparent_78%)] max-lg:bg-bg/55" />
