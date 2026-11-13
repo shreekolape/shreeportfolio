@@ -26,14 +26,30 @@ export const site = {
     off: "Off",
   },
 
-  /** Live status line. `{time}` is replaced with the current HH:MM in Pune. */
-  status:
-    "Available for freelance projects · it's {time} in Pune, so I'll probably reply after I wake up.",
+  /**
+   * Live status line, chosen by the current hour in Asia/Kolkata ([from, to)
+   * in 24h local time). `{time}` is replaced with the current HH:MM. The
+   * green dot is rendered separately by <StatusLine>, not part of the text.
+   */
+  status: [
+    { from: 0, to: 5, text: "Available for freelance projects · it's {time} in Pune, peak bug-fixing hours." },
+    {
+      from: 5,
+      to: 10,
+      text: "Available for freelance projects · it's {time} in Pune. The bugs are asleep, and I might be too.",
+    },
+    { from: 10, to: 18, text: "Available for freelance projects · it's {time} in Pune, probably mid-deploy." },
+    { from: 18, to: 24, text: "Available for freelance projects · it's {time} in Pune, the night shift is warming up." },
+  ],
 
   footer: {
     heading: "Got a project? Let's build it.",
     cta: { label: "Say hi", href: "/contact" },
     credit: "Designed & built by Shree. Debugged at unreasonable hours.",
+    /** The footer never prints the address itself — just the word "Email" plus a copy button. */
+    emailLinkLabel: "Email",
+    copyEmailAriaLabel: "Copy email address",
+    copiedLabel: "Copied",
   },
 
   /** First visit per session. Date/time is rendered live in Asia/Kolkata. */

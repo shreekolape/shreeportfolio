@@ -23,6 +23,13 @@ export function formatPuneClock(date: Date): string {
   return clockFormat.format(date);
 }
 
+const hourFormat = new Intl.DateTimeFormat("en-GB", { timeZone: PUNE_TIME_ZONE, hour: "2-digit", hourCycle: "h23" });
+
+/** Current hour (0–23) in Asia/Kolkata. */
+export function getPuneHour(date: Date): number {
+  return Number(hourFormat.format(date));
+}
+
 /** "Wed, 14 Oct · 01:19" (used by the preloader) */
 export function formatPuneDateTime(date: Date): string {
   const parts = Object.fromEntries(dateFormat.formatToParts(date).map((p) => [p.type, p.value]));

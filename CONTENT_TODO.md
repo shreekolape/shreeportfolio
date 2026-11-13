@@ -4,7 +4,7 @@ Everything still to fill in before launch. Search the repo for `{PLACEHOLDER` to
 all text placeholders. While one is unfilled it shows on the page with a dashed amber
 outline, and links that aren't ready point to `#` and get a dashed outline in development.
 
-Line numbers are as of the Phase 6 commit; they shift as you edit.
+Line numbers are as of the "content and fixes" update commit; they shift as you edit.
 
 ---
 
@@ -14,18 +14,9 @@ Line numbers are as of the Phase 6 commit; they shift as you edit.
 
 | Line | What | Notes |
 | ---- | ---- | ----- |
-| 54 | Email address | Used in the footer and on Contact (mailto). |
-| 56 | GitHub profile URL | Footer + Contact. |
-| 57 | LinkedIn profile URL | Footer + Contact. |
-| 49 | Alt text for the desk scene still | See media below. |
-
-### About: `content/about.ts`
-
-| Line | What | Notes |
-| ---- | ---- | ----- |
-| 8–17 | **Approve or replace the About intro** | Draft built only from facts in the brief. When it's final, set `approved: true` (line 10) to remove the dev-only "draft" marker. |
-| 34 | "How I work" section | To be written together. |
-| 23 | Photo alt text | Goes with the photo below. |
+| — | Email address | Already set. Used in the footer ("Email" link + copy button) and on Contact. |
+| — | GitHub / LinkedIn URLs | Already set. |
+| 60ish | Alt text for the desk scene still | See media below. |
 
 ### Contact: `content/contact.ts`
 
@@ -35,69 +26,58 @@ Line numbers are as of the Phase 6 commit; they shift as you edit.
 
 ### Projects: `content/projects.ts`
 
+VIVIN, MittiNav, Christ TCEA and Swamini Foods now have real live URLs and cover images.
+Only Being Relevant and a few per-project details are still open:
+
 | Line | Project | What |
 | ---- | ------- | ---- |
-| 31 | VIVIN | Project status |
-| 33 | VIVIN | Live site URL |
-| 34 | VIVIN | Repo URL (leave `""` to hide the link) |
-| 67, 72, 77, 82, 87, 92, 97 | VIVIN | "What I worked on" badges: set each to `"Shipped"` or `"In progress"` |
-| 105 | VIVIN | Challenge 1 approach (Excel imports) |
-| 111 | VIVIN | Challenge 2 approach (PDF catalogues) |
-| 117 | VIVIN | Challenge 3 approach (production deployments) |
-| 122–123 | VIVIN | Outcome: add **only after client approval**; keep `null` to hide the section |
-| 138 | MittiNav | Project status |
-| 140 | MittiNav | Live site URL |
-| 141 | MittiNav | Repo URL (leave `""` to hide) |
-| 170 | Being Relevant | Project status |
-| 172 | Being Relevant | Live site URL |
-| 204 | Christ TCEA | Project status |
-| 206 | Christ TCEA | Live site URL |
-| 207 | Christ TCEA | Repo URL (leave `""` to hide) |
-| 237 | Swamini Foods | Project status |
+| 37 | VIVIN | Project status |
+| 40 | VIVIN | Repo URL (leave `""` to hide the link) |
+| 73, 78, 83, 88, 93, 98, 103 | VIVIN | "What I worked on" badges: set each to `"Shipped"` or `"In progress"` |
+| 111 | VIVIN | Challenge 1 approach (Excel imports) |
+| 117 | VIVIN | Challenge 2 approach (PDF catalogues) |
+| 123 | VIVIN | Challenge 3 approach (production deployments) |
+| 129 | VIVIN | Outcome: add **only after client approval**; keep `null` to hide the section |
+| 144 | MittiNav | Project status |
+| 147 | MittiNav | Repo URL (leave `""` to hide) |
+| 177 | Christ TCEA | Project status |
+| 180 | Christ TCEA | Repo URL (leave `""` to hide) |
+| 210 | Swamini Foods | Project status |
+| 243 | Being Relevant | Project status |
+| 245 | Being Relevant | Live site URL |
+| 247–248 | Being Relevant | Cover + monitor preview image |
 
-Swamini Foods intentionally has **no live link** (`liveUrl: null`), because the current site
-has been changed by another developer. Being Relevant and Swamini Foods have no repo link.
+Being Relevant has no repo link (Wix Studio site). Swamini Foods has no repo link either.
 
 ---
 
 ## 2. Media files
 
 Each item below currently renders as a neutral labelled gradient block. To swap one in, put
-the file in `/public` (e.g. `/public/work/vivin/cover.jpg`), then replace that
+the file in `/public` (e.g. `/public/projects/being-relevant/cover.webp`), then replace that
 `placeholderMedia("…")` call with
-`{ type: "image", src: "/work/vivin/cover.jpg", alt: "…", label: "…" }`.
+`{ type: "image", src: "/projects/being-relevant/cover.webp", alt: "…", label: "…" }`.
 Use `type: "video"` for short muted loops (good for monitor previews).
 
 | File: line | Slot |
 | ---------- | ---- |
-| `content/projects.ts:35` | VIVIN · Cover |
-| `content/projects.ts:36` | VIVIN · Monitor preview (plays on the 3D monitor / mobile thumbnail) |
-| `content/projects.ts:38` | VIVIN · Storefront category page |
-| `content/projects.ts:39` | VIVIN · Product listing |
-| `content/projects.ts:40` | VIVIN · Admin import screen |
-| `content/projects.ts:41` | VIVIN · Sample PDF catalogue page |
-| `content/projects.ts:142` | MittiNav · Cover |
-| `content/projects.ts:143` | MittiNav · Monitor preview |
-| `content/projects.ts:144` | MittiNav · Gallery (currently empty; add items to show the section) |
-| `content/projects.ts:174` | Being Relevant · Cover |
-| `content/projects.ts:175` | Being Relevant · Monitor preview |
-| `content/projects.ts:176` | Being Relevant · Gallery (currently empty) |
-| `content/projects.ts:208` | Christ TCEA · Cover |
-| `content/projects.ts:209` | Christ TCEA · Monitor preview |
-| `content/projects.ts:210` | Christ TCEA · Gallery (currently empty) |
-| `content/projects.ts:242` | Swamini Foods · Cover: **your own screenshot of the original build** |
-| `content/projects.ts:243` | Swamini Foods · Preview: original build |
-| `content/projects.ts:246` | Swamini Foods · Original build screenshot(s) |
-| `content/about.ts:22` | Your photo |
-| `content/site.ts:48` | Desk scene still/loop for mobile, low-power and reduced motion |
+| `content/projects.ts:34-38` (VIVIN gallery) | Storefront category page · Product listing · Admin import screen · Sample PDF catalogue page |
+| `content/projects.ts:150` | MittiNav · Gallery (currently empty; add items to show the section) |
+| `content/projects.ts:183` | Christ TCEA · Gallery (currently empty) |
+| `content/projects.ts:218` | Swamini Foods · Additional original-build screenshots (one placeholder in the gallery already) |
+| `content/projects.ts:247` | Being Relevant · Cover |
+| `content/projects.ts:248` | Being Relevant · Monitor preview |
+| `content/projects.ts:249` | Being Relevant · Gallery (currently empty) |
+| `content/about.ts` | Your photo |
+| `content/site.ts` | Desk scene still/loop for mobile, low-power and reduced motion |
 
 ---
 
 ## 3. Assets that aren't text
 
 - **3D model**: `public/models/desk-scene.glb` with clips `sleep`, `wake`, `type`, `idle`,
-  `wave` and a mesh named `Screen`. Then set `model.enabled = true` in
-  `components/three/sceneConfig.ts`. Details: `public/models/README.md`.
+  `wave` (plus `relax`/`phone` once those poses exist) and a mesh named `Screen`. Then set
+  `model.enabled = true` in `components/three/sceneConfig.ts`. Details: `public/models/README.md`.
 - **UI sounds**: the four clips in `public/sounds/` are generated placeholders. Replace
   them with the same file names. Details: `public/sounds/README.md`.
 
@@ -106,14 +86,15 @@ Use `type: "video"` for short muted loops (good for monitor previews).
 ## 4. Copy written during the build, for your approval
 
 These aren't `{PLACEHOLDER}`s because the UI needs some wording to work, but they weren't
-in the brief:
+in a brief verbatim:
 
 - Contact form messages (`content/contact.ts`): field errors, "Send", "Sending…", the success
   message and "Something went wrong sending that. Please email me instead."
 - 404 page (`content/labels.ts`): "Page not found." and "Back to home →".
 - Work page meta description (`app/work/page.tsx`): "Client projects: VIVIN, MittiNav, …",
   built from the project list.
-- Case-study and About section labels (`content/labels.ts`, `content/about.ts`).
+- Case-study and About section labels (`content/labels.ts`).
+- Footer "Copy email address" / "Copied" wording (`content/site.ts`).
 
 ---
 

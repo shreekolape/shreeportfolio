@@ -6,6 +6,7 @@ import { Magnetic } from "@/components/ui/Magnetic";
 import { SmartLink } from "@/components/ui/SmartLink";
 import { StatusLine } from "@/components/ui/StatusLine";
 import { TransitionLink } from "@/components/transitions/TransitionLink";
+import { CopyEmailButton } from "@/components/ui/CopyEmailButton";
 
 const linkClass = "link-underline text-muted transition-colors hover:text-accent";
 
@@ -48,10 +49,11 @@ export function Footer() {
 
         <div className="mt-20 flex flex-col gap-6 border-t border-line pt-8 text-sm sm:flex-row sm:items-center sm:justify-between">
           <ul className="flex flex-wrap items-center gap-x-6 gap-y-2">
-            <li>
+            <li className="flex items-center gap-1.5">
               <SmartLink href={`mailto:${contact.email}`} data-sound="" className={linkClass}>
-                {contact.email}
+                {footer.emailLinkLabel}
               </SmartLink>
+              <CopyEmailButton email={contact.email} ariaLabel={footer.copyEmailAriaLabel} copiedLabel={footer.copiedLabel} />
             </li>
             {contact.socials.map((social) => (
               <li key={social.label}>

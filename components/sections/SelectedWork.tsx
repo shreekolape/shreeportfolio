@@ -44,9 +44,9 @@ export function SelectedWork() {
                   {/* Inline thumbnail stands in for the 3D monitor preview. */}
                   <MediaFrame
                     media={project.previewMedia}
-                    aspect="4 / 3"
-                    sizes="96px"
-                    className="no3d-only w-24 shrink-0 rounded-lg"
+                    aspect="16 / 9"
+                    sizes="112px"
+                    className="no3d-only w-28 shrink-0 rounded-lg"
                   />
                   <div className="transition-transform duration-500 ease-[var(--ease-out)] md:group-hover:translate-x-2">
                     <h3 className="text-2xl font-semibold tracking-tight transition-colors group-hover:text-accent sm:text-3xl">

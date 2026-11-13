@@ -5,15 +5,9 @@ export const about = {
   heading: "About",
 
   intro: {
-    // {PLACEHOLDER: Shree to provide or approve the final About text}
-    // Draft below is built only from facts already in the brief; nothing personal added.
-    approved: false,
-    /** Dev-only marker shown while `approved` is false. */
-    draftNote: "{PLACEHOLDER: About intro is a draft, awaiting approval}",
     paragraphs: [
-      "Hi, I'm Shree, a web developer building websites and web apps for real businesses, and keeping them running after launch.",
-      "So far that's meant a B2B wholesale platform, corporate gifting stores, a climate startup's website and Shopify stores that need looking after. Some of it is building from scratch; a lot of it is the work after that: integrations, deployments, fixing what breaks and keeping things running.",
-      "I care about clean design and things that don't break in production. Usually in that order, occasionally at 3 AM.",
+      "I'm Shree, a Computer Engineering student at Savitribai Phule Pune University and a web developer who builds for real clients. So far that's meant a B2B wholesale platform with bulk imports and PDF catalogues, a corporate gifting store with 700+ products, a climate startup's website, a food brand's online store, and ongoing work on a live Shopify store.",
+      "I like the part after launch as much as the launch itself: fixing what breaks, improving what's slow, and adding what the business needs next. Most of my best debugging happens late at night, which explains the guy asleep on the homepage.",
     ],
   },
 
@@ -31,5 +25,23 @@ export const about = {
     howIWork: "How I work",
   },
 
-  howIWork: "{PLACEHOLDER: short 'How I work' section, to be written with Shree}",
+  /** Numbered list, same visual style as Home's Selected Work rows. */
+  howIWork: [
+    {
+      title: "Understand the business first",
+      body: "What you sell, who it's for and what the site has to do, before I pick a single tool.",
+    },
+    {
+      title: "Pick the right tool, not the trendy one",
+      body: "Wix, WordPress or Shopify when you want to manage it yourself. React when it needs custom logic.",
+    },
+    {
+      title: "Show progress early",
+      body: "You see working pages along the way, so feedback lands before changes get expensive.",
+    },
+    {
+      title: "Stick around after launch",
+      body: "Fixes, updates and new features, so the site keeps up with the business.",
+    },
+  ],
 } as const;

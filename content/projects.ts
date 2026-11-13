@@ -5,6 +5,12 @@ function placeholderMedia(label: string, type: Media["type"] = "image"): Media {
   return { type, src: null, alt: label, label };
 }
 
+// Real 16:9 cover shot, used for the cover, the 3D monitor preview and the
+// mobile/fallback inline thumbnail alike.
+function cover(slug: string, title: string, category: string): Media {
+  return { type: "image", src: `/projects/${slug}/cover.webp`, alt: `${title} — ${category}`, label: `${title} · Cover` };
+}
+
 export const projectFilters: Array<"All" | ProjectFilter> = ["All", "Client", "E-commerce"];
 
 export const projects: Project[] = [
@@ -30,10 +36,10 @@ export const projects: Project[] = [
     type: "Client project",
     status: "{PLACEHOLDER: confirm}",
     featured: true,
-    liveUrl: "{PLACEHOLDER: VIVIN live site URL}",
+    liveUrl: "https://www.vivin.shop/",
     repoUrl: "", // {PLACEHOLDER: VIVIN repo URL (leave empty to hide)}
-    cover: placeholderMedia("VIVIN · Cover"),
-    previewMedia: placeholderMedia("VIVIN · Monitor preview"),
+    cover: cover("vivin", "VIVIN", "B2B Wholesale Platform"),
+    previewMedia: cover("vivin", "VIVIN", "B2B Wholesale Platform"),
     gallery: [
       placeholderMedia("VIVIN · Storefront category page"),
       placeholderMedia("VIVIN · Product listing"),
@@ -137,10 +143,10 @@ export const projects: Project[] = [
     type: "Client project",
     status: "{PLACEHOLDER: confirm}",
     featured: true,
-    liveUrl: "{PLACEHOLDER: MittiNav live site URL}",
+    liveUrl: "https://www.mittinav.com/",
     repoUrl: "", // {PLACEHOLDER: MittiNav repo URL (leave empty to hide)}
-    cover: placeholderMedia("MittiNav · Cover"),
-    previewMedia: placeholderMedia("MittiNav · Monitor preview"),
+    cover: cover("mittinav", "MittiNav", "Climate & Agriculture"),
+    previewMedia: cover("mittinav", "MittiNav", "Climate & Agriculture"),
     gallery: [], // {PLACEHOLDER: MittiNav gallery screenshots}
     caseStudy: {
       // Do not mention carbon measurement, emissions verification, monitoring systems or any climate tech features.
@@ -156,44 +162,11 @@ export const projects: Project[] = [
     },
   },
 
-  // --------------------------------------------------------- Being Relevant
-  {
-    slug: "being-relevant",
-    title: "Being Relevant",
-    category: "Corporate Gifting Store",
-    oneLiner:
-      "700+ products organised into categories people can actually navigate, with size-based pricing and WhatsApp enquiries.",
-    tags: ["Client", "E-commerce"],
-    stack: ["Wix Studio", "Wix CMS"],
-    role: "Website development (Wix Studio)",
-    type: "Client project",
-    status: "{PLACEHOLDER: confirm}",
-    featured: true,
-    liveUrl: "{PLACEHOLDER: Being Relevant live site URL}",
-    repoUrl: null, // Wix Studio site: no repo
-    cover: placeholderMedia("Being Relevant · Cover"),
-    previewMedia: placeholderMedia("Being Relevant · Monitor preview"),
-    gallery: [], // {PLACEHOLDER: Being Relevant gallery screenshots}
-    caseStudy: {
-      // Enquiry-based flow. Do not describe checkout or payments.
-      overview:
-        "A corporate gifting website with a large product assortment, categories, subcategories and customer enquiries.",
-      whatIDid: [
-        { body: "Built collection and product listing pages" },
-        { body: "Worked with a 700+ product catalogue" },
-        { body: "Organised categories and subcategories" },
-        { body: "Presented size-based pricing" },
-        { body: "Worked on account-related functionality and WhatsApp enquiry flows" },
-        { body: "Refined CTA placement and overall UX" },
-      ],
-    },
-  },
-
   // ------------------------------------------------------------ Christ TCEA
   {
     slug: "christ-tcea",
     title: "Christ TCEA",
-    category: "Permaculture Platform",
+    category: "Controlled Environment Agriculture Platform",
     oneLiner:
       "Authentication screens and contributions to platform features: daily logs, nursery batch tracking and library uploads.",
     tags: ["Client"],
@@ -203,15 +176,15 @@ export const projects: Project[] = [
     label: "Internship project (Being Relevant)",
     status: "{PLACEHOLDER: confirm}",
     featured: true,
-    liveUrl: "{PLACEHOLDER: Christ TCEA live site URL}",
+    liveUrl: "https://beingrelevant.ai/",
     repoUrl: "", // {PLACEHOLDER: Christ TCEA repo URL (leave empty to hide)}
-    cover: placeholderMedia("Christ TCEA · Cover"),
-    previewMedia: placeholderMedia("Christ TCEA · Monitor preview"),
+    cover: cover("christ-tcea", "Christ TCEA", "Controlled Environment Agriculture Platform"),
+    previewMedia: cover("christ-tcea", "Christ TCEA", "Controlled Environment Agriculture Platform"),
     gallery: [], // {PLACEHOLDER: Christ TCEA gallery screenshots}
     caseStudy: {
       // The auth page is HTML/CSS/Tailwind, NOT React. Keep "contributed to" / "worked on" wording.
       overview:
-        "A permaculture website and platform with authentication, daily activity logs, nursery batch tracking and a file library.",
+        "A controlled environment agriculture website and platform with authentication, daily activity logs, nursery batch tracking and a file library.",
       whatIDid: [
         { body: "Implemented the authentication page in HTML, CSS and Tailwind CSS" },
         { body: "Worked on login, Google sign-in and password-reset UI" },
@@ -235,24 +208,56 @@ export const projects: Project[] = [
     role: "Website development & launch",
     type: "Client project",
     status: "{PLACEHOLDER: confirm}",
-    featured: false,
-    // The live site has since been changed by another developer: never link it as my work.
-    liveUrl: null,
+    featured: true,
+    liveUrl: "https://swaminifoods.in/",
     repoUrl: null,
-    cover: placeholderMedia("Swamini Foods · Cover (original build)"),
-    previewMedia: placeholderMedia("Swamini Foods · Preview (original build)"),
+    cover: cover("swamini-foods", "Swamini Foods", "Food E-commerce"),
+    previewMedia: cover("swamini-foods", "Swamini Foods", "Food E-commerce"),
     gallery: [
-      // {PLACEHOLDER: my own screenshots of the original build, not the current live site}
+      // {PLACEHOLDER: additional screenshots of the original build}
       placeholderMedia("Swamini Foods · Original build screenshot"),
     ],
     caseStudy: {
-      // Do not claim custom plugins, custom payment integrations or order-management features.
+      // The live site has since been updated by someone else: this case study covers the original build only.
       note: "This case study covers my original build. The site has since been updated by another developer.",
       overview: "An e-commerce food-ordering website for a food business.",
       whatIDid: [
         {
           body: "Built and launched the store on WordPress + WooCommerce with 9 products, with real orders placed and shipped through it",
         },
+      ],
+    },
+  },
+
+  // --------------------------------------------------------- Being Relevant
+  {
+    slug: "being-relevant",
+    title: "Being Relevant",
+    category: "Corporate Gifting Store",
+    oneLiner:
+      "700+ products organised into categories people can actually navigate, with size-based pricing and WhatsApp enquiries.",
+    tags: ["Client", "E-commerce"],
+    stack: ["Wix Studio", "Wix CMS"],
+    role: "Website development (Wix Studio)",
+    type: "Client project",
+    status: "{PLACEHOLDER: confirm}",
+    featured: false,
+    liveUrl: "{PLACEHOLDER: Being Relevant live site URL}",
+    repoUrl: null, // Wix Studio site: no repo
+    cover: placeholderMedia("Being Relevant · Cover"),
+    previewMedia: placeholderMedia("Being Relevant · Monitor preview"),
+    gallery: [], // {PLACEHOLDER: Being Relevant gallery screenshots}
+    caseStudy: {
+      // Enquiry-based flow. Do not describe checkout or payments.
+      overview:
+        "A corporate gifting website with a large product assortment, categories, subcategories and customer enquiries.",
+      whatIDid: [
+        { body: "Built collection and product listing pages" },
+        { body: "Worked with a 700+ product catalogue" },
+        { body: "Organised categories and subcategories" },
+        { body: "Presented size-based pricing" },
+        { body: "Worked on account-related functionality and WhatsApp enquiry flows" },
+        { body: "Refined CTA placement and overall UX" },
       ],
     },
   },

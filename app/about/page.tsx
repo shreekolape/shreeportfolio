@@ -4,7 +4,6 @@ import { site } from "@/content/site";
 import { pageMetadata } from "@/lib/metadata";
 import { education, experience } from "@/content/experience";
 import { skillTiers } from "@/content/skills";
-import { ContentText } from "@/components/ui/ContentText";
 import { MediaFrame } from "@/components/ui/MediaFrame";
 import { Tag } from "@/components/ui/Tag";
 
@@ -33,11 +32,6 @@ export default function AboutPage() {
       <div className="grid gap-12 pb-16 md:grid-cols-[minmax(0,1.6fr)_minmax(0,1fr)] md:items-end md:gap-16 sm:pb-24">
         <div>
           <h1 className="text-6xl font-semibold tracking-[-0.04em] sm:text-8xl">{about.heading}</h1>
-          {!intro.approved && (
-            <p data-dev-note="" className="mt-6">
-              <ContentText value={intro.draftNote} />
-            </p>
-          )}
           <div className="mt-8 grid max-w-2xl gap-5 text-lg leading-relaxed text-muted sm:text-xl">
             {intro.paragraphs.map((p, i) => (
               <p key={i} className={i === 0 ? "text-fg" : undefined}>
@@ -97,9 +91,20 @@ export default function AboutPage() {
       </Section>
 
       <Section id="how-i-work" title={sections.howIWork}>
-        <p className="max-w-2xl text-lg leading-relaxed text-muted">
-          <ContentText value={howIWork} />
-        </p>
+        {/* Same numbered-row style as Home's Selected Work. */}
+        <ol className="max-w-2xl divide-y divide-line border-t border-line">
+          {howIWork.map((item, i) => (
+            <li key={item.title} className="flex gap-4 py-6 first:pt-0 sm:gap-6">
+              <span aria-hidden="true" className="pt-0.5 font-mono text-xs text-subtle">
+                {String(i + 1).padStart(2, "0")}
+              </span>
+              <div>
+                <h3 className="text-lg font-semibold tracking-tight text-fg">{item.title}</h3>
+                <p className="mt-1.5 leading-relaxed text-muted">{item.body}</p>
+              </div>
+            </li>
+          ))}
+        </ol>
       </Section>
     </div>
   );

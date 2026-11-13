@@ -6,6 +6,8 @@ import type { Media } from "@/content/types";
 
 const W = 1024;
 const H = 640;
+/** Natural aspect of the idle/placeholder canvases. */
+export const SCREEN_ASPECT = W / H;
 
 function canvasTexture(draw: (ctx: CanvasRenderingContext2D) => void): THREE.CanvasTexture {
   const canvas = document.createElement("canvas");
@@ -76,10 +78,15 @@ export type ScreenTexture = {
   tinted: boolean;
   /** Video previews play only while visible. */
   video?: HTMLVideoElement;
+  /**
+   * Natural width/height of the source (updates once an async image/video
+   * loads), read every frame so the shader can sample it without stretching.
+   */
+  aspect: number;
 };
 
 export function createMediaTexture(media: Media): ScreenTexture {
-  if (!media.src) return { texture: createPlaceholderTexture(media.label), tinted: false };
+  if (!media.src) return { texture: createPlaceholderTexture(media.label), tinted: false, aspect: SCREEN_ASPECT };
 
   if (media.type === "video") {
     const video = document.createElement("video");
@@ -91,11 +98,20 @@ export function createMediaTexture(media: Media): ScreenTexture {
     video.preload = "auto";
     const texture = new THREE.VideoTexture(video);
     texture.colorSpace = THREE.SRGBColorSpace;
-    return { texture, tinted: false, video };
+    const result: ScreenTexture = { texture, tinted: false, video, aspect: 16 / 9 };
+    video.addEventListener("loadedmetadata", () => {
+      if (video.videoWidth && video.videoHeight) result.aspect = video.videoWidth / video.videoHeight;
+    });
+    return result;
   }
 
-  const texture = new THREE.TextureLoader().load(media.src);
-  texture.colorSpace = THREE.SRGBColorSpace;
-  texture.anisotropy = 4;
-  return { texture, tinted: false };
+  // All current cover images are 16:9; used as the aspect until the real image loads.
+  const result: ScreenTexture = { texture: new THREE.Texture(), tinted: false, aspect: 16 / 9 };
+  result.texture = new THREE.TextureLoader().load(media.src, (texture) => {
+    const image = texture.image as { width?: number; height?: number } | undefined;
+    if (image?.width && image?.height) result.aspect = image.width / image.height;
+  });
+  result.texture.colorSpace = THREE.SRGBColorSpace;
+  result.texture.anisotropy = 4;
+  return result;
 }

@@ -4,6 +4,7 @@ import { useRef, type ReactNode } from "react";
 import { gsap, useGSAP } from "@/lib/gsap";
 import { appState, duration, ease, stagger } from "@/lib/motion";
 import { PRELOADER_DONE_EVENT } from "@/lib/preloader";
+import { TRANSITION_REVEAL_EVENT } from "@/providers/TransitionProvider";
 
 /**
  * Hero entrance: words of `[data-hero-word]` rise out of their masks, then
@@ -37,8 +38,10 @@ export function HeroReveal({ children, className }: { children: ReactNode; class
         window.addEventListener(PRELOADER_DONE_EVENT, play, { once: true });
         return () => window.removeEventListener(PRELOADER_DONE_EVENT, play);
       }
-      // Client navigation: wait for the curtain to start lifting.
-      tl.delay(0.45).play();
+      // Client navigation: TransitionProvider fires this the instant the curtain starts lifting.
+      const play = () => tl.play();
+      window.addEventListener(TRANSITION_REVEAL_EVENT, play, { once: true });
+      return () => window.removeEventListener(TRANSITION_REVEAL_EVENT, play);
     },
     { scope: ref },
   );
