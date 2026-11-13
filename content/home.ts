@@ -65,13 +65,13 @@ export const home = {
         title: "B2B & Wholesale Catalogues",
         body: "Large product catalogues with categories, bulk pricing, quantity rules and downloadable PDF catalogues.",
         proof: { label: "See VIVIN →", href: "/work/vivin" },
-        mockup: placeholderMedia("B2B catalogue · Concept"),
+        mockup: projectCover("vivin"),
       },
       {
         title: "NGOs & Impact Projects",
         body: "Sites that explain your mission, show your work on the ground and make it easy for people to get involved.",
         proof: { label: "See MittiNav →", href: "/work/mittinav" },
-        mockup: placeholderMedia("NGO site · Concept"),
+        mockup: projectCover("mittinav"),
       },
       {
         title: "Real Estate & Property Listings",

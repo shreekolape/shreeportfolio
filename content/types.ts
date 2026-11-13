@@ -92,7 +92,9 @@ export type Education = {
 
 export type SkillTier = {
   title: string;
-  items: string[];
+  /** Flat tiers set this. "Currently learning" uses `groups` instead. */
+  items?: string[];
+  groups?: { title: string; items: string[] }[];
 };
 
 export type WhatIDoRow = {

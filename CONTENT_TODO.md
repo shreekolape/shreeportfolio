@@ -70,7 +70,7 @@ Use `type: "video"` for short muted loops (good for monitor previews).
 | `content/projects.ts:249` | Being Relevant · Gallery (currently empty) |
 | `content/about.ts` | Your photo |
 | `content/site.ts` | Desk scene still/loop for mobile, low-power and reduced motion |
-| `content/home.ts` (`whatIDo.rows`) | 8 "What I Do" concept mockups (Cafés, Magazines, Startup, Clinics, B2B catalogue, NGO, Real estate, AI agents chat). Invented names/screens only — no real brands or client names. The other 2 rows (Online Stores, Business Dashboards) already reuse the real Swamini Foods / VIVIN covers. |
+| `content/home.ts` (`whatIDo.rows`) | 6 "What I Do" concept mockups (Cafés, Magazines, Startup, Clinics, Real estate, AI agents chat). Invented names/screens only — no real brands or client names. The 4 rows with a proof link (Online Stores, Business Dashboards, B2B Catalogues, NGOs) reuse the real Swamini Foods / VIVIN / VIVIN / MittiNav covers instead. |
 
 ---
 

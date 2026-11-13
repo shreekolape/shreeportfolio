@@ -78,13 +78,31 @@ export default function AboutPage() {
           {skillTiers.map((tier) => (
             <div key={tier.title}>
               <h3 className="text-lg font-semibold tracking-tight">{tier.title}</h3>
-              <ul className="mt-4 flex flex-wrap gap-2">
-                {tier.items.map((item) => (
-                  <li key={item}>
-                    <Tag className="px-3 py-1.5 text-xs text-fg/85">{item}</Tag>
-                  </li>
-                ))}
-              </ul>
+              {tier.items && (
+                <ul className="mt-4 flex flex-wrap gap-2">
+                  {tier.items.map((item) => (
+                    <li key={item}>
+                      <Tag className="px-3 py-1.5 text-xs text-fg/85">{item}</Tag>
+                    </li>
+                  ))}
+                </ul>
+              )}
+              {tier.groups && (
+                <div className="mt-4 grid gap-4 sm:grid-cols-2">
+                  {tier.groups.map((group) => (
+                    <div key={group.title}>
+                      <h4 className="font-mono text-xs uppercase tracking-wider text-muted">{group.title}</h4>
+                      <ul className="mt-2 flex flex-wrap gap-2">
+                        {group.items.map((item) => (
+                          <li key={item}>
+                            <Tag className="px-3 py-1.5 text-xs text-fg/85">{item}</Tag>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
           ))}
         </div>

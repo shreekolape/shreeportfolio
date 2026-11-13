@@ -124,7 +124,7 @@ Link: **More about me →** (to /about)
 9. **Real Estate & Property Listings:** filterable property listings with photo galleries and an enquiry form for every property.
 10. **AI Agents for Business** · **Coming soon** pill, dimmed, not clickable, no proof link, no "View" cursor label: assistants that answer customer questions from your own content, qualify leads and handle routine tasks, so your team can focus on the work that matters.
 
-Hovering a row plays its concept mockup on the 3D monitor (rows with a proof link reuse that project's real cover; the rest are invented concept mockups, no real brands or client names, pending real assets).
+Hovering a row plays its concept mockup on the 3D monitor: the 4 rows with a proof link (3, 6, 7, 8) reuse that project's real cover; the other 6 rows show an invented concept mockup (no real brands or client names), pending real assets.
 
 **Stack strip** (smooth infinite marquee; pauses on hover)
 React · TypeScript · Tailwind CSS · TanStack Start · Supabase · MySQL · Cloudflare R2 · Firebase · Vercel · GitHub · Shopify · WordPress · Wix Studio

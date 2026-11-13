@@ -1,6 +1,6 @@
 import type { SkillTier } from "./types";
 
-/** About page: four honest tiers. */
+/** About page: three honest tiers, the last one split into sub-groups. */
 export const skillTiers: SkillTier[] = [
   {
     title: "Used in projects",
@@ -34,17 +34,22 @@ export const skillTiers: SkillTier[] = [
     ],
   },
   {
-    title: "AI engineering",
-    items: [
-      "LLM integration",
-      "RAG (embeddings and vector databases)",
-      "AI agents and tool calling",
-      "Evaluating AI output",
+    title: "Currently learning",
+    groups: [
+      {
+        title: "AI engineering",
+        items: [
+          "LLM integration",
+          "RAG (embeddings and vector databases)",
+          "AI agents and tool calling",
+          "Evaluating AI output",
+        ],
+      },
+      {
+        title: "Engineering foundations",
+        items: ["System design", "Backend and API design", "Database design", "Testing and clean architecture"],
+      },
     ],
-  },
-  {
-    title: "Engineering foundations",
-    items: ["System design", "Backend and API design", "Database design", "Testing and clean architecture"],
   },
 ];
 

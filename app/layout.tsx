@@ -59,6 +59,7 @@ export default function RootLayout({ children }: Readonly<{ children: ReactNode 
       suppressHydrationWarning
     >
       <head>
+        {/* Runs before paint so a repeat visit never flashes the preloader; a React component would mount too late. */}
         <script dangerouslySetInnerHTML={{ __html: preloadedHeadScript }} />
         <noscript>
           <style>{".preloader{display:none}"}</style>
