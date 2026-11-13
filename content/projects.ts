@@ -1,7 +1,7 @@
 import type { Media, Project, ProjectFilter } from "./types";
 
 // Neutral placeholder media: renders as a labelled gradient block until `src` is set.
-function placeholderMedia(label: string, type: Media["type"] = "image"): Media {
+export function placeholderMedia(label: string, type: Media["type"] = "image"): Media {
   return { type, src: null, alt: label, label };
 }
 

@@ -5,6 +5,7 @@ import { useEffect, useMemo, useRef } from "react";
 import { useFrame } from "@react-three/fiber";
 import * as THREE from "three";
 import { featuredProjects } from "@/content/projects";
+import { home } from "@/content/home";
 import { dims } from "./sceneDims";
 import { getActivePreview, subscribePreview } from "@/lib/previewStore";
 import { createIdleTexture, createMediaTexture, SCREEN_ASPECT, type ScreenTexture } from "./screenTextures";
@@ -97,14 +98,20 @@ export function useScreenMaterial(): THREE.ShaderMaterial {
       return tex;
     };
 
-    // Preload every featured project's cover once the monitor exists, so the
-    // first hover shows an already-decoded texture instead of a blank frame.
+    // Preload every featured project's cover, plus every What I Do row's
+    // mockup, once the monitor exists, so the first hover shows an
+    // already-decoded texture instead of a blank frame.
     for (const p of featuredProjects) getOrCreate(p.slug, p.previewMedia);
+    home.whatIDo.rows.forEach((row, i) => getOrCreate(`what-i-do-${i}`, row.mockup));
 
     const resolve = (): ScreenTexture => {
       const slug = getActivePreview();
-      const project = slug ? featuredProjects.find((p) => p.slug === slug) : undefined;
-      return project ? getOrCreate(project.slug, project.previewMedia) : idle;
+      if (!slug) return idle;
+      const project = featuredProjects.find((p) => p.slug === slug);
+      if (project) return getOrCreate(project.slug, project.previewMedia);
+      const whatIDoMatch = slug.match(/^what-i-do-(\d+)$/);
+      const row = whatIDoMatch ? home.whatIDo.rows[Number(whatIDoMatch[1])] : undefined;
+      return row ? getOrCreate(slug, row.mockup) : idle;
     };
     const update = () => {
       wanted.current = resolve();

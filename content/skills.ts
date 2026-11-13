@@ -1,13 +1,10 @@
 import type { SkillTier } from "./types";
 
-/** About page: three honest tiers. */
+/** About page: four honest tiers. */
 export const skillTiers: SkillTier[] = [
   {
     title: "Used in projects",
     items: [
-      "HTML",
-      "CSS",
-      "JavaScript",
       "React",
       "TypeScript (VIVIN)",
       "Tailwind CSS",
@@ -37,20 +34,22 @@ export const skillTiers: SkillTier[] = [
     ],
   },
   {
-    title: "Currently learning",
+    title: "AI engineering",
     items: [
-      "MERN stack",
-      "Java",
-      "Stronger JavaScript, React, TypeScript, backend, database and debugging fundamentals",
+      "LLM integration",
+      "RAG (embeddings and vector databases)",
+      "AI agents and tool calling",
+      "Evaluating AI output",
     ],
+  },
+  {
+    title: "Engineering foundations",
+    items: ["System design", "Backend and API design", "Database design", "Testing and clean architecture"],
   },
 ];
 
 /** Home page marquee. Figma is intentionally not here. */
 export const stackStrip: string[] = [
-  "HTML",
-  "CSS",
-  "JavaScript",
   "React",
   "TypeScript",
   "Tailwind CSS",

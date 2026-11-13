@@ -6,8 +6,10 @@ export const about = {
 
   intro: {
     paragraphs: [
-      "I'm Shree, a Computer Engineering student at Savitribai Phule Pune University and a web developer who builds for real clients. So far that's meant a B2B wholesale platform with bulk imports and PDF catalogues, a corporate gifting store with 700+ products, a climate startup's website, a food brand's online store, and ongoing work on a live Shopify store.",
-      "I like the part after launch as much as the launch itself: fixing what breaks, improving what's slow, and adding what the business needs next. Most of my best debugging happens late at night, which explains the guy asleep on the homepage.",
+      "I'm Shree, a web developer from Pune and a final-year Computer Engineering student. I started building websites for real businesses while still in college, and that shaped how I work. A website isn't just a design or a codebase. It's something a business depends on to sell, take orders and explain what it does.",
+      "So I start with the business, not the tech. Who are your customers, what should they be able to do, and what's slowing your team down today? Then I build the simplest thing that solves it well, keep you in the loop as it takes shape, and make sure it's easy to run once it's live.",
+      "What I enjoy most is the moment a messy process becomes simple: a spreadsheet turns into a dashboard, an enquiry turns into an order, a confusing page turns into one people actually use.",
+      "Right now I'm finishing my degree, working on a live e-commerce store and taking on freelance projects. Alongside that, I'm learning to build with AI properly (LLMs, retrieval and AI agents) and studying system design, so the next things I build are smarter and still well engineered. And yes, a lot of it happens late at night.",
     ],
   },
 
@@ -29,11 +31,11 @@ export const about = {
   howIWork: [
     {
       title: "Understand the business first",
-      body: "What you sell, who it's for and what the site has to do, before I pick a single tool.",
+      body: "What you sell, who it's for and what the site has to do, before any design or code.",
     },
     {
-      title: "Pick the right tool, not the trendy one",
-      body: "Wix, WordPress or Shopify when you want to manage it yourself. React when it needs custom logic.",
+      title: "Choose what fits, not what's trendy",
+      body: "The right approach depends on your goals, your budget and how much you want to manage yourself.",
     },
     {
       title: "Show progress early",
@@ -41,7 +43,7 @@ export const about = {
     },
     {
       title: "Stick around after launch",
-      body: "Fixes, updates and new features, so the site keeps up with the business.",
+      body: "Fixes, improvements and new features, so the site keeps up with the business.",
     },
   ],
 } as const;

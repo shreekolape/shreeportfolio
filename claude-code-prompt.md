@@ -62,7 +62,13 @@ Shared across all pages: header nav (Home, Work, About, Contact, sound toggle), 
 - Exits with a smooth reveal into the hero.
 
 ### 5.2 Page transitions
-Smooth transitions between all routes (an overlay or curtain wipe in the accent colour, timed and eased cleanly). Scroll resets to top on route change.
+A single `TransitionProvider` + `TransitionLink` drive every internal link (nav, Selected Work, What I Do proof links, "See all work", "More about me", "Next project", footer). Fixed order, so the new page never flashes before the cover:
+1. **Cover:** on click, animate the accent-coloured overlay in (~350ms) before navigating.
+2. **Navigate:** only then call `router.push()`.
+3. **Wait:** stay opaque until `usePathname()` reflects the new route, plus one `requestAnimationFrame`. Scroll resets to top (Lenis `scrollTo(0, { immediate: true })`) while covered.
+4. **Reveal:** animate the overlay out (~450ms).
+
+Nav routes and featured case studies are prefetched on mount. Clicks on the current route or mid-transition are ignored; modifier/middle clicks and external links behave normally. Browser back/forward can't be covered pre-emptively (Next's router reacts to `popstate` before any app-level listener can), so those get a quick snap-cover + fast reveal instead. A 3s fallback reveals anyway if a route never mounts. Reduced motion: instant swap, no overlay.
 
 ### 5.3 Custom cursor
 - A small dot with a trailing ring that follows with easing.
@@ -95,7 +101,7 @@ The 3D desk scene (section 7) runs through the home page as a scroll-driven stor
 - 3D state: character asleep at the desk at night, monitor glowing.
 
 **Intro** (the character wakes up during this section)
-> Hi, I'm Shree. I build for actual clients: a B2B wholesale platform, corporate gifting stores, a climate startup's website and Shopify stores that need looking after. I care about clean design and things that don't break in production. Usually in that order, occasionally at 3 AM.
+> I'm Shree. I help businesses get a website that does its job: easy for customers to use, simple for the team to manage, and reliable long after launch. I start with how your business works, build around it, and stay around to keep improving it.
 
 Link: **More about me →** (to /about)
 
@@ -103,22 +109,38 @@ Link: **More about me →** (to /about)
 - Each row shows the title, category, one-line description and stack tags.
 - **Hovering a row plays that project's preview on the 3D monitor screen** (video or image texture). On mobile or the fallback, show a small inline thumbnail instead.
 - Click opens the case study.
-- Content comes from the projects data (section 6.3), where `featured: true` marks these four: VIVIN, MittiNav, Being Relevant, Christ TCEA.
+- Content comes from the projects data (section 6.3), where `featured: true` marks these four, in this order: **VIVIN, MittiNav, Christ TCEA, Swamini Foods**. Being Relevant is no longer featured but stays listed on the Work page.
 - Link: **See all work →**
 
-**What I Do** (exactly two blocks, with no UI/UX block)
-- **Websites & Web Apps:** from clean business sites to React apps with databases, storage and admin dashboards.
-- **E-commerce:** Shopify, WooCommerce and Wix stores, covering catalogues, enquiries, and payment and shipping integrations.
+**What I Do** — heading "Things I can build for you", 10 numbered rows (01–10), same list pattern as Selected Work:
+1. **Cafés & Restaurants:** menus that make people hungry, with table bookings and orders straight to WhatsApp.
+2. **Magazines & Blogs:** editorial sites with bold layouts, categories and an easy CMS so you can publish without me.
+3. **Online Stores & D2C Brands:** product pages, carts, payments and shipping, from 9 products to 700+. Proof: "See Swamini Foods →".
+4. **Startup & Product Launches:** landing pages that explain your idea in one scroll and collect sign-ups.
+5. **Clinics & Local Businesses:** services, timings, location and booking enquiries, simple and trustworthy.
+6. **Business Dashboards:** custom admin panels for products, orders, imports and reports. Proof: "See VIVIN →".
+7. **B2B & Wholesale Catalogues:** large product catalogues with categories, bulk pricing, quantity rules and downloadable PDF catalogues. Proof: "See VIVIN →".
+8. **NGOs & Impact Projects:** sites that explain your mission, show your work on the ground and make it easy for people to get involved. Proof: "See MittiNav →".
+9. **Real Estate & Property Listings:** filterable property listings with photo galleries and an enquiry form for every property.
+10. **AI Agents for Business** · **Coming soon** pill, dimmed, not clickable, no proof link, no "View" cursor label: assistants that answer customer questions from your own content, qualify leads and handle routine tasks, so your team can focus on the work that matters.
+
+Hovering a row plays its concept mockup on the 3D monitor (rows with a proof link reuse that project's real cover; the rest are invented concept mockups, no real brands or client names, pending real assets).
 
 **Stack strip** (smooth infinite marquee; pauses on hover)
-HTML · CSS · JavaScript · React · TypeScript · Tailwind CSS · TanStack Start · Supabase · MySQL · Cloudflare R2 · Firebase · Vercel · GitHub · Shopify · WordPress · Wix Studio
-(Figma is intentionally **not** in this strip.)
+React · TypeScript · Tailwind CSS · TanStack Start · Supabase · MySQL · Cloudflare R2 · Firebase · Vercel · GitHub · Shopify · WordPress · Wix Studio
+(HTML/CSS/JS and Figma are intentionally **not** in this strip.)
 
 **Footer CTA** (shared on every page)
 - Heading: **Got a project? Let's build it.**
 - Magnetic button: **Say hi** (to /contact)
-- Status line, with the time live in Asia/Kolkata: 🟢 *Available for freelance projects · it's {HH:MM} in Pune, so I'll probably reply after I wake up.*
-- Email and social links (placeholders)
+- Status line, chosen by the current hour in Asia/Kolkata, updating every minute without a reload:
+  | Pune time | Line |
+  |---|---|
+  | 00:00–04:59 | 🟢 Available for freelance projects · it's {HH:MM} in Pune, peak bug-fixing hours. |
+  | 05:00–09:59 | 🟢 Available for freelance projects · it's {HH:MM} in Pune. The bugs are asleep, and I might be too. |
+  | 10:00–17:59 | 🟢 Available for freelance projects · it's {HH:MM} in Pune, probably mid-deploy. |
+  | 18:00–23:59 | 🟢 Available for freelance projects · it's {HH:MM} in Pune, the night shift is warming up. |
+- Email: shows only the word **Email** (`mailto:` link) plus a copy-to-clipboard icon that briefly shows "Copied" — the full address is never printed in the footer. Social links (GitHub, LinkedIn).
 - Bottom line: *Designed & built by Shree. Debugged at unreasonable hours.*
 - 3D state: the character leans back and waves as the footer comes into view.
 - Footer interactions have sound when sound is on.
@@ -133,14 +155,14 @@ HTML · CSS · JavaScript · React · TypeScript · Tailwind CSS · TanStack Sta
 Each project has: `slug, title, category, oneLiner, tags (filters), stack[], role, type, status, featured, liveUrl, repoUrl, cover, previewMedia, gallery[], caseStudy`.
 
 **VIVIN** (`vivin`)
-- Category: B2B Wholesale Platform · Filters: Client, E-commerce · Featured
+- Category: B2B Wholesale Platform · Filters: Client, E-commerce · Featured · Live: https://www.vivin.shop/
 - One-liner: A custom wholesale platform with a category-first storefront, bulk Excel imports across thousands of products, and PDF catalogues generated from all of it.
 - Stack: TanStack Start, React, TypeScript, Tailwind CSS, Supabase, Cloudflare R2, Vercel, GitHub
 - Role: Development, feature implementation, integrations, troubleshooting & deployment
 - Case study: see section 6.4 (the deepest one)
 
 **MittiNav** (`mittinav`)
-- Category: Climate & Agriculture · Filters: Client · Featured
+- Category: Climate & Agriculture · Filters: Client · Featured · Live: https://www.mittinav.com/
 - One-liner: A website telling the story of biochar, connecting farmers, soil and climate impact through a clear, modern experience.
 - Stack: React, Tailwind CSS, Vercel, GitHub
 - Role: Website development & deployment
@@ -150,7 +172,7 @@ Each project has: `slug, title, category, oneLiner, tags (filters), stack[], rol
   - **Do not** mention carbon measurement, emissions verification, monitoring systems or any climate tech features.
 
 **Being Relevant** (`being-relevant`)
-- Category: Corporate Gifting Store · Filters: Client, E-commerce · Featured
+- Category: Corporate Gifting Store · Filters: Client, E-commerce · Not featured (stays listed on the Work page)
 - One-liner: 700+ products organised into categories people can actually navigate, with size-based pricing and WhatsApp enquiries.
 - Stack: Wix Studio, Wix CMS
 - Role: Website development (Wix Studio)
@@ -160,17 +182,18 @@ Each project has: `slug, title, category, oneLiner, tags (filters), stack[], rol
   - **Do not** describe checkout or payments. It is an enquiry-based flow.
 
 **Christ TCEA** (`christ-tcea`)
-- Category: Permaculture Platform · Filters: Client · Featured · Label: *Internship project (Being Relevant)*
+- Category: Controlled Environment Agriculture Platform · Filters: Client · Featured · Label: *Internship project (Being Relevant)* · Live: https://beingrelevant.ai/
 - One-liner: Authentication screens and contributions to platform features: daily logs, nursery batch tracking and library uploads.
 - Stack: HTML, CSS, Tailwind CSS, Firebase Hosting, Cloudflare R2
 - Role: UI implementation & platform functionality
 - Short case study:
-  - Overview: a permaculture website and platform with authentication, daily activity logs, nursery batch tracking and a file library.
+  - Overview: a controlled environment agriculture website and platform with authentication, daily activity logs, nursery batch tracking and a file library.
+  - "Permaculture" does not appear anywhere in this project's copy.
   - What I did: implemented the authentication page in HTML, CSS and Tailwind CSS (**not React**); worked on login, Google sign-in and password-reset UI; contributed to daily logs and 15-day nursery batch features; worked on library file uploads and their storage setup; worked with Firebase Hosting and Cloudflare R2; helped troubleshoot functionality and deployment issues.
   - Use "contributed to" or "worked on" wording for platform features, exactly as written.
 
 **Swamini Foods** (`swamini-foods`)
-- Category: Food E-commerce · Filters: Client, E-commerce · Not featured
+- Category: Food E-commerce · Filters: Client, E-commerce · Featured · Live: https://swaminifoods.in/
 - One-liner: A WordPress and WooCommerce food-ordering store, built and launched with live orders and shipping.
 - Stack: WordPress, WooCommerce
 - Role: Website development & launch
@@ -229,7 +252,14 @@ VIVIN moved me from building pages to handling real data and production limits: 
 ### 6.5 About page (`/about`)
 Work-focused, playful in tone but professional. **No personal-life content for now.**
 
-- **Intro:** a longer version of the home intro. {PLACEHOLDER: I'll provide or approve the final About text.} Draft from the home intro tone and do not add personal facts.
+- **Intro** (approved final text, four paragraphs):
+  > I'm Shree, a web developer from Pune and a final-year Computer Engineering student. I started building websites for real businesses while still in college, and that shaped how I work. A website isn't just a design or a codebase. It's something a business depends on to sell, take orders and explain what it does.
+  >
+  > So I start with the business, not the tech. Who are your customers, what should they be able to do, and what's slowing your team down today? Then I build the simplest thing that solves it well, keep you in the loop as it takes shape, and make sure it's easy to run once it's live.
+  >
+  > What I enjoy most is the moment a messy process becomes simple: a spreadsheet turns into a dashboard, an enquiry turns into an order, a confusing page turns into one people actually use.
+  >
+  > Right now I'm finishing my degree, working on a live e-commerce store and taking on freelance projects. Alongside that, I'm learning to build with AI properly (LLMs, retrieval and AI agents) and studying system design, so the next things I build are smarter and still well engineered. And yes, a lot of it happens late at night.
 - **Photo:** {PLACEHOLDER}
 - **Education:** B.E. Computer Engineering · Savitribai Phule Pune University · 2027. **Do not mention any college name.**
 - **Experience timeline:**
@@ -237,11 +267,16 @@ Work-focused, playful in tone but professional. **No personal-life content for n
     Website maintenance and development; Shopify API integrations; contributing to payment-related work with Razorpay and shipping and fulfilment workflows with Shiprocket; add-ons, workflow improvements and functionality refinements. (Frame as contributions; never imply I own or built the whole platform.)
   - **Being Relevant** · Web Development & UI/UX Intern · Feb to Mar 2026
     Created and refined UI/UX designs in Figma; built the Christ TCEA authentication page in HTML, CSS and Tailwind CSS; worked on Wix Studio collection pages for a corporate gifting site; improved CTA placement and page presentation. (**This is the only place UI/UX and Figma appear.**)
-- **Skills**, shown in three honest tiers:
-  - **Used in projects:** HTML, CSS, JavaScript, React, TypeScript (VIVIN), Tailwind CSS, TanStack Start, Wix Studio, WordPress, WooCommerce, Shopify, Shopify APIs, Supabase, MySQL, Cloudflare R2, Firebase Hosting, Vercel, GitHub, Razorpay & Shiprocket (integration work)
+- **Skills**, shown in four honest tiers:
+  - **Used in projects:** React, TypeScript (VIVIN), Tailwind CSS, TanStack Start, Wix Studio, WordPress, WooCommerce, Shopify, Shopify APIs, Supabase, MySQL, Cloudflare R2, Firebase Hosting, Vercel, GitHub, Razorpay & Shiprocket (integration work)
   - **Workflow & tools:** Claude Code, Windsurf, GitHub-based version control and deployment, environment configuration and build troubleshooting, third-party APIs and cloud services
-  - **Currently learning:** MERN stack, Java, and stronger JavaScript, React, TypeScript, backend, database and debugging fundamentals
-- **How I work:** {PLACEHOLDER: short section, to be written with me}
+  - **AI engineering:** LLM integration, RAG (embeddings and vector databases), AI agents and tool calling, evaluating AI output
+  - **Engineering foundations:** System design, backend and API design, database design, testing and clean architecture
+- **How I work** (approved, four numbered items, same list style as Selected Work):
+  1. **Understand the business first.** What you sell, who it's for and what the site has to do, before any design or code.
+  2. **Choose what fits, not what's trendy.** The right approach depends on your goals, your budget and how much you want to manage yourself.
+  3. **Show progress early.** You see working pages along the way, so feedback lands before changes get expensive.
+  4. **Stick around after launch.** Fixes, improvements and new features, so the site keeps up with the business.
 - Footer CTA as usual.
 
 ### 6.6 Contact page (`/contact`)

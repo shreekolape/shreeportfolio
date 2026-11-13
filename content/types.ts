@@ -94,3 +94,13 @@ export type SkillTier = {
   title: string;
   items: string[];
 };
+
+export type WhatIDoRow = {
+  title: string;
+  body: string;
+  /** Extra credibility link for the few rows backed by a real case study. */
+  proof?: { label: string; href: string };
+  /** Shown on the 3D monitor (desktop) or inline (mobile) on hover/focus. */
+  mockup: Media;
+  comingSoon?: boolean;
+};
