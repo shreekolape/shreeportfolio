@@ -5,27 +5,31 @@ import { pageMetadata } from "@/lib/metadata";
 import { education, experience } from "@/content/experience";
 import { skillTiers } from "@/content/skills";
 import { PageScene } from "@/components/three/PageScene";
+import { MediaFrame } from "@/components/ui/MediaFrame";
 import { Tag } from "@/components/ui/Tag";
 
 export const metadata = pageMetadata({ title: about.heading, description: site.pitch, path: "/about" });
 
-function Section({ id, title, children }: { id: string; title: string; children: ReactNode }) {
+function Section({ id, title, aside, children }: { id: string; title: string; aside?: ReactNode; children: ReactNode }) {
   return (
     <section
       aria-labelledby={id}
       data-reveal=""
       className="grid gap-6 border-t border-line py-14 sm:py-20 md:grid-cols-[minmax(0,1fr)_minmax(0,2.4fr)] md:gap-12"
     >
-      <h2 id={id} className="font-mono text-xs uppercase tracking-widest text-muted">
-        {title}
-      </h2>
+      <div>
+        <h2 id={id} className="font-mono text-xs uppercase tracking-widest text-muted">
+          {title}
+        </h2>
+        {aside}
+      </div>
       <div className="min-w-0">{children}</div>
     </section>
   );
 }
 
 export default function AboutPage() {
-  const { intro, sections, howIWork } = about;
+  const { intro, photo, sections, howIWork } = about;
 
   return (
     <div className="wrap pb-16 pt-[calc(var(--header-h)+5rem)] sm:pt-[calc(var(--header-h)+8rem)]">
@@ -40,8 +44,13 @@ export default function AboutPage() {
             ))}
           </div>
         </div>
-        {/* Golden hour: leaning back, relaxed (3D close-up, or its still). */}
-        <PageScene state="relax" shot="about" fallback={about.sceneFallback} className="w-full max-w-sm md:max-w-none" />
+        <MediaFrame
+          media={photo}
+          aspect="4 / 5"
+          priority
+          sizes="(min-width: 768px) 35vw, 100vw"
+          className="max-w-sm md:max-w-none"
+        />
       </div>
 
       <Section id="education" title={sections.education}>
@@ -109,7 +118,14 @@ export default function AboutPage() {
         </div>
       </Section>
 
-      <Section id="how-i-work" title={sections.howIWork}>
+      <Section
+        id="how-i-work"
+        title={sections.howIWork}
+        aside={
+          // Golden hour: leaning back, relaxed (3D close-up, or its still).
+          <PageScene state="relax" shot="about" fallback={about.sceneFallback} className="mt-8 w-full max-w-xs" />
+        }
+      >
         {/* Same numbered-row style as Home's Selected Work. */}
         <ol className="max-w-2xl divide-y divide-line border-t border-line">
           {howIWork.map((item, i) => (

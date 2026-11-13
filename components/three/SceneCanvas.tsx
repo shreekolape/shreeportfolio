@@ -1,6 +1,6 @@
 "use client";
 
-import { Suspense, useEffect, useMemo, useRef } from "react";
+import { lazy, Suspense, useEffect, useMemo, useRef } from "react";
 import { Canvas, useFrame, useThree } from "@react-three/fiber";
 import { useProgress } from "@react-three/drei";
 import * as THREE from "three";
@@ -9,9 +9,12 @@ import { model, palette, render, shots } from "./sceneConfig";
 import { PlaceholderDesk } from "./PlaceholderDesk";
 import { ModelDesk } from "./ModelDesk";
 import { accentColor, accentGlow } from "./accent";
-import { DebugBounds } from "./DebugBounds";
 import { dims, lamp as lampDims } from "./sceneDims";
 import { ambientFactor, exposureFactor, keyLightColor, keyLightFactor, lampFactor, sunVisibility } from "./dayCycle";
+
+// Collision viewer (?debug=bounds): development only, so production never ships or loads it.
+const DebugBounds =
+  process.env.NODE_ENV === "development" ? lazy(() => import("./DebugBounds").then((m) => ({ default: m.DebugBounds }))) : null;
 
 /**
  * Monitor glow and the rim light follow the live accent (unchanged); the
@@ -177,8 +180,7 @@ function FirstFrame() {
 
 export default function SceneCanvas({ panel = false }: { panel?: boolean }) {
   const start = shots[sceneState.shot];
-  // TEMPORARY debug toggle (?debug=bounds); removed before the final commit.
-  const debugBounds = new URLSearchParams(window.location.search).get("debug") === "bounds";
+  const debugBounds = DebugBounds !== null && new URLSearchParams(window.location.search).get("debug") === "bounds";
 
   return (
     <Canvas
@@ -202,7 +204,7 @@ export default function SceneCanvas({ panel = false }: { panel?: boolean }) {
           <meshStandardMaterial color={palette.floor} roughness={1} />
         </mesh>
         <FirstFrame />
-        {debugBounds && <DebugBounds />}
+        {debugBounds && DebugBounds && <DebugBounds />}
       </Suspense>
     </Canvas>
   );

@@ -1,6 +1,11 @@
-import { placeholderMedia, projects } from "./projects";
+import { projects } from "./projects";
 import { site } from "./site";
-import type { WhatIDoRow } from "./types";
+import type { Media, WhatIDoRow } from "./types";
+
+// Invented concept screen (1600×900, no real brands), labelled "Concept" in the image itself.
+function concept(file: string, alt: string): Media {
+  return { type: "image", src: `/concepts/${file}.webp`, alt, label: alt };
+}
 
 function projectCover(slug: string) {
   const project = projects.find((p) => p.slug === slug);
@@ -32,12 +37,12 @@ export const home = {
       {
         title: "Cafés & Restaurants",
         body: "Menus that make people hungry, with table bookings and orders straight to WhatsApp.",
-        mockup: placeholderMedia("Café menu site · Concept"),
+        mockup: concept("cafe", "Concept café website with a menu, table booking and WhatsApp ordering"),
       },
       {
         title: "Magazines & Blogs",
         body: "Editorial sites with bold layouts, categories and an easy CMS so you can publish without me.",
-        mockup: placeholderMedia("Editorial site · Concept"),
+        mockup: concept("magazine", "Concept magazine homepage with a cover story and categories"),
       },
       {
         title: "Online Stores & D2C Brands",
@@ -48,12 +53,12 @@ export const home = {
       {
         title: "Startup & Product Launches",
         body: "Landing pages that explain your idea in one scroll and collect sign-ups.",
-        mockup: placeholderMedia("Launch landing page · Concept"),
+        mockup: concept("startup", "Concept startup landing page with a waitlist sign-up"),
       },
       {
         title: "Clinics & Local Businesses",
         body: "Services, timings, location and booking enquiries, simple and trustworthy.",
-        mockup: placeholderMedia("Clinic site · Concept"),
+        mockup: concept("clinic", "Concept clinic website with timings and appointment booking"),
       },
       {
         title: "Business Dashboards",
@@ -76,12 +81,12 @@ export const home = {
       {
         title: "Real Estate & Property Listings",
         body: "Filterable property listings with photo galleries and an enquiry form for every property.",
-        mockup: placeholderMedia("Real estate listings · Concept"),
+        mockup: concept("realestate", "Concept property listings page with filters"),
       },
       {
         title: "AI Agents for Business",
         body: "Assistants that answer customer questions from your own content, qualify leads and handle routine tasks, so your team can focus on the work that matters.",
-        mockup: placeholderMedia("Business chat assistant · Coming soon"),
+        mockup: concept("assistant", "Concept AI assistant chatting with a customer on a business website"),
         comingSoon: true,
       },
     ] satisfies WhatIDoRow[],

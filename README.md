@@ -30,12 +30,11 @@ All copy and data live in `content/`. Components only read from it.
 | `content/about.ts` / `content/contact.ts` | About and Contact page copy |
 | `content/labels.ts` | Small UI labels (case-study headings, 404) |
 
-**Placeholders.** Every unknown is a `{PLACEHOLDER: ...}` string. While one is unfilled it shows on
-the page with a dashed outline, so nothing slips through. `CONTENT_TODO.md` lists every one, plus
-the media files, model and sounds still to supply.
+**Still to come.** `CONTENT_TODO.md` lists the few things not yet available (and what to do when
+they arrive). Sections with no real content are hidden rather than shown empty.
 
-**Images.** Media entries with `src: null` render as labelled gradient blocks. Point `src` at a file
-in `/public` to replace one.
+**Images.** A project with no cover image yet (`src: null`) renders a typographic cover (its title,
+category and an accent gradient). Point `src` at a file in `/public` to replace it.
 
 ## Where things live
 

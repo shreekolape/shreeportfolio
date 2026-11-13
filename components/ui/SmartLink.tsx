@@ -1,7 +1,7 @@
 "use client";
 
 import type { AnchorHTMLAttributes, ReactNode } from "react";
-import { isExternalHref, isPlaceholderHref } from "@/lib/links";
+import { isExternalHref, isFileHref, isPlaceholderHref } from "@/lib/links";
 import { TransitionLink } from "@/components/transitions/TransitionLink";
 
 type SmartLinkProps = Omit<AnchorHTMLAttributes<HTMLAnchorElement>, "href"> & {
@@ -11,8 +11,9 @@ type SmartLinkProps = Omit<AnchorHTMLAttributes<HTMLAnchorElement>, "href"> & {
 
 /**
  * One link component for every case:
- * - placeholder ({PLACEHOLDER} / "#") → inert "#" link, marked in development
+ * - empty / "#" → inert "#" link, marked in development
  * - external / mailto → new tab (http) with "Open" cursor label
+ * - a static file (e.g. the résumé PDF) → plain link, so it downloads instead of routing
  * - internal → TransitionLink with the curtain wipe
  */
 export function SmartLink({ href, children, ...props }: SmartLinkProps) {
@@ -25,6 +26,13 @@ export function SmartLink({ href, children, ...props }: SmartLinkProps) {
   }
 
   const url = href as string;
+  if (isFileHref(url) && !isExternalHref(url)) {
+    return (
+      <a href={url} {...props}>
+        {children}
+      </a>
+    );
+  }
   if (isExternalHref(url)) {
     const newTab = url.startsWith("http") || url.startsWith("//");
     return (

@@ -1,11 +1,9 @@
-// Shared content types. Every unknown value is a "{PLACEHOLDER: ...}" string
-// so all of them can be found with one search.
-
-export type Placeholder = `{PLACEHOLDER: ${string}}`;
+// Shared content types. Anything still owed is tracked in CONTENT_TODO.md.
 
 /**
- * An image or video. `src: null` renders a neutral gradient block showing
- * `label` (e.g. "VIVIN · Admin import screen") until the real file exists.
+ * An image or video. `alt` doubles as the visible caption in galleries.
+ * `src: null` (only Being Relevant's cover, until its screenshot arrives)
+ * renders a typographic cover built from `label`, never an empty block.
  */
 export type Media = {
   type: "image" | "video";
@@ -16,7 +14,7 @@ export type Media = {
 
 export type ProjectFilter = "Client" | "E-commerce";
 
-export type WorkStatus = "Shipped" | "In progress" | Placeholder;
+export type WorkStatus = "Shipped" | "In progress";
 
 export type WorkItem = {
   /** Bold lead-in, e.g. "Storefront". Short case studies use plain bullets. */
@@ -66,10 +64,12 @@ export type Project = {
   label?: string;
   status: string;
   featured: boolean;
-  /** null = never link (not a placeholder). Placeholder strings render as "#". */
+  /** null hides the "Live site" link. */
   liveUrl: string | null;
-  /** "" or null hides the repo link. */
+  /** null hides the repo link. */
   repoUrl: string | null;
+  /** Private client repository: show a muted "Source code: private" note instead of a link. */
+  sourcePrivate?: boolean;
   cover: Media;
   /** Plays on the 3D monitor (desktop) or as an inline thumbnail (mobile). */
   previewMedia: Media;

@@ -207,7 +207,7 @@ Each project has: `slug, title, category, oneLiner, tags (filters), stack[], rol
 ### 6.4 VIVIN case study (full content)
 
 **Header:** VIVIN · A custom B2B wholesale platform
-**Meta:** Client project · Role: Development, integrations & deployment · Stack: TanStack Start, React, TypeScript, Tailwind CSS, Supabase, Cloudflare R2, Vercel · Status: {PLACEHOLDER: confirm}
+**Meta:** Client project · Role: Development, integrations & deployment · Stack: TanStack Start, React, TypeScript, Tailwind CSS, Supabase, Cloudflare R2, Vercel · Status: Live · ongoing development
 
 **Overview**
 VIVIN is a B2B wholesale platform for corporate gifting and product distribution. It pairs a customer-facing storefront with admin tools for managing products, catalogues and orders, built on custom application logic rather than an e-commerce template.
@@ -215,7 +215,7 @@ VIVIN is a B2B wholesale platform for corporate gifting and product distribution
 **The brief**
 A wholesale business works differently from a regular online store: a large catalogue, bulk product data that changes in spreadsheets, quantity rules like minimum orders and cartons, and catalogues and reports that the team needs to export. VIVIN needed a storefront and an admin side built around those workflows.
 
-**What I worked on** (each item carries a status badge: `Shipped` or `In progress`, set in data; default to `{PLACEHOLDER: confirm}`)
+**What I worked on** (each item carries a status badge: every item `Shipped`, except Pricing rules, which is `In progress`)
 - **Storefront:** category-first browsing, category and subcategory navigation, product discovery
 - **Admin:** product management workflows, import history and reporting
 - **Bulk data:** Excel imports across thousands of products, data validation and SKU-based image matching
@@ -224,28 +224,30 @@ A wholesale business works differently from a regular online store: a large cata
 - **Pricing rules:** minimum order quantities and carton-based quantities
 - **Deployment:** Vercel with a GitHub-connected workflow; environment variables, build failures, package compatibility and resource limits
 
-**Engineering challenges** (three blocks; each has a "Challenge" paragraph written below and an "Approach" paragraph that stays a placeholder until I fill it in)
+**Engineering challenges** (three blocks; each has a "Challenge" and an "Approach" paragraph)
 
 1. **Importing thousands of products from Excel**
    Product data arrives in spreadsheets with thousands of rows, and every row has to be validated and matched to its images in storage by SKU. Bad rows and mismatched images need to be caught and fixed without breaking the whole import.
-   Approach: {PLACEHOLDER: what I did}
+   Approach: I built the import to check every row before saving anything: required fields, data formats and duplicate SKUs. Rows that failed were collected into a clear list instead of stopping the whole import, so the rest could go through and the bad rows could be fixed and re-imported. Product images were matched to products by SKU, which made missing or mismatched images obvious straight away, and every import was recorded in an import history so changes could be traced.
 
 2. **Generating PDF catalogues at scale**
    Building catalogues with product details and images across a large dataset ran into pagination, image processing and memory limits, all inside the constraints of a serverless deployment.
-   Approach: {PLACEHOLDER: what I did}
+   Approach: Instead of building the whole catalogue in one go, I generated it in smaller batches, resized and compressed product images before placing them, and used a fixed page layout so pagination stayed predictable. That kept memory use and processing time within what a serverless deployment allows, even with a large catalogue.
 
 3. **Keeping production deployments healthy**
    Shipping to Vercel meant working through environment configuration, build failures, package compatibility issues and platform resource limits.
-   Approach: {PLACEHOLDER: what I did}
+   Approach: I moved all configuration into environment variables for each environment, tracked down build failures to package version conflicts and fixed them, and kept heavy processing out of short-lived serverless functions to stay within Vercel's resource limits.
 
 **What it taught me**
 VIVIN moved me from building pages to handling real data and production limits: thinking about what happens with thousands of records, large files and a deployment platform that has ceilings. It is the project where I learned the most about how web apps behave once real business data is involved.
 
-**Gallery** (placeholders): storefront category page · product listing · admin import screen · sample PDF catalogue page
+**Gallery:** screenshots of public pages on the live site (1600×900, captioned; captions are the alt text). Never log in, no admin/account pages, order data or personal information. VIVIN's category, product and catalogue pages need a login, so its gallery shows the public home, categories, catalogue-request and About views.
 
-**Outcome:** {PLACEHOLDER: add a verified outcome after client approval; otherwise hide this section}
+**Outcome:** Live at vivin.shop as the business's wholesale storefront, with a catalogue of 2,000+ products, customer accounts, orders and downloadable PDF catalogues, alongside an admin side the team uses to manage it.
 
-**Links:** Live site {PLACEHOLDER} · Hide the repo link if empty.
+**Links:** Live site ↗ · "Source code: private (client project)" in muted text (also on MittiNav and Christ TCEA).
+
+**Every case study** has a status, cover, gallery, outcome and links section. Statuses: VIVIN *Live · ongoing development*, MittiNav *Live*, Christ TCEA *Live*, Swamini Foods *Launched · since updated by another developer*, Being Relevant *Delivered*. Until Being Relevant's live link arrives, its "Live site" button and gallery are hidden and its cover is typographic (title, category, accent gradient). Swamini Foods' gallery is held back too: its live site has been rebuilt by another developer on a different platform, so screenshots of it wouldn't show the original build.
 
 **Next project →** link at the bottom of every case study, cycling through the projects.
 
@@ -260,7 +262,8 @@ Work-focused, playful in tone but professional. **No personal-life content for n
   > What I enjoy most is the moment a messy process becomes simple: a spreadsheet turns into a dashboard, an enquiry turns into an order, a confusing page turns into one people actually use.
   >
   > Right now I'm finishing my degree, working on a live e-commerce store and taking on freelance projects. Alongside that, I'm learning to build with AI properly (LLMs, retrieval and AI agents) and studying system design, so the next things I build are smarter and still well engineered. And yes, a lot of it happens late at night.
-- **Scene (golden hour):** a small 3D close-up of the character leaning back, relaxed (`relax` pose), in the intro's right column; background uses the evening tint. Where 3D doesn't load, a rendered still of the same scene is shown.
+- **Photo:** a portrait rendered from the 3D character (head and shoulders, three-quarter view, studio light, dark background), in the intro's right column. Alt: "Stylised 3D portrait of Shree in a black hoodie and glasses."
+- **Scene (golden hour):** a small 3D close-up of the character leaning back, relaxed (`relax` pose), under the "How I work" heading; background uses the evening tint. Where 3D doesn't load, a rendered still of the same scene is shown.
 - **Education:** B.E. Computer Engineering · Savitribai Phule Pune University · 2027. **Do not mention any college name.**
 - **Experience timeline:**
   - **Thavare** · Website Development & Maintenance · Jun 2026 to Present
@@ -283,8 +286,8 @@ Work-focused, playful in tone but professional. **No personal-life content for n
 - Heading: **Let's build something.**
 - Subline: *I'm available for freelance projects: websites, web apps and e-commerce stores.*
 - Form fields: name, email, project type (Website · Web App · E-commerce · Something else), message. Validate on the client side.
-- Form submission: build the UI and a Next.js route handler stub; leave the email provider unconnected with a clear TODO and env var placeholders. **Do not** hard-code any API keys.
-- Also show: email {PLACEHOLDER}, socials (GitHub, LinkedIn) {PLACEHOLDER}, résumé download {PLACEHOLDER}.
+- Form submission: sent with **Resend** from the route handler (`RESEND_API_KEY`, `CONTACT_TO_EMAIL`, optional `CONTACT_FROM_EMAIL` defaulting to `Portfolio <onboarding@resend.dev>`). Reply-to is the visitor's email; subject `New project enquiry from {name}`. Validation, a honeypot and a per-IP rate limit. A missing key logs a clear server error and the form shows its fallback message. Setup: `CONTACT_SETUP.md`. **Do not** hard-code any API keys.
+- Also show: email, socials (GitHub, LinkedIn), and a "Download résumé ↓" link to `/resume/Shree-Kolape-Resume.pdf` (with `download`).
 - The status line with live Pune time, the same as in the footer.
 - **Scene (night):** a small 3D close-up above the contact details: lamp on, the character at the desk looking at the phone in his right hand (`phone` pose; screen faces him and softly lights his face). Background uses the night tint. Rendered still where 3D doesn't load.
 - Freelance only. Do not mention jobs or internships.
@@ -334,7 +337,7 @@ A stylised desk scene that runs through the home page and is driven by scroll, t
 
 ## 9. Placeholders
 
-- Every unknown is written as `{PLACEHOLDER: ...}` in the data files, so I can search for and replace them all.
+- All placeholders have been filled. Anything still owed is listed in `CONTENT_TODO.md`; sections without real content are hidden, never shown empty or as grey blocks.
 - Placeholder images are neutral gradient blocks labelled with what they stand for (for example, "VIVIN · Admin import screen"). Do not use random stock photos.
 - Links that aren't ready point to `#` and are visually marked during development.
 - Add a `CONTENT_TODO.md` listing every placeholder by file and line.

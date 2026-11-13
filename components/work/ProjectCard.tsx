@@ -1,13 +1,13 @@
 import type { Project } from "@/content/types";
 import { TransitionLink } from "@/components/transitions/TransitionLink";
-import { MediaFrame } from "@/components/ui/MediaFrame";
+import { ProjectCover } from "@/components/ui/ProjectCover";
 import { Tag } from "@/components/ui/Tag";
 
 export function ProjectCard({ project }: { project: Project }) {
   return (
     <TransitionLink href={`/work/${project.slug}`} data-cursor="View" className="group block">
-      <MediaFrame
-        media={project.cover}
+      <ProjectCover
+        project={project}
         sizes="(min-width: 768px) 50vw, 100vw"
         className="transition-[border-color] duration-300 group-hover:border-accent"
       />

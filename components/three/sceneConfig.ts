@@ -15,10 +15,12 @@ export const sectionStates: Record<string, { state: CharacterState; shot: Shot }
 };
 
 /**
- * The real model. Set `enabled: true` once /public/models/desk-scene.glb exists.
- * It must contain the five clips below (rename them here if Blender/Mixamo
- * names differ) and a mesh named `screenMeshName` with 0–1 UVs, which gets
- * the crossfading preview material.
+ * Optional GLB slot for a possible future model; the hand-built character is
+ * the current design. While `enabled` is false nothing requests the file, so
+ * only set it to true once /public/models/desk-scene.glb actually exists. It
+ * must contain the clips below (rename them here if Blender/Mixamo names
+ * differ) and a mesh named `screenMeshName` with 0–1 UVs, which gets the
+ * crossfading preview material.
  */
 export const model = {
   enabled: false,

@@ -75,20 +75,10 @@ html.has-custom-cursor * {
   cursor: none !important;
 }
 
-/* Links that are still placeholders ("#") get a visible marker in development. */
+/* Links without a destination yet ("#") get a visible marker in development. */
 html[data-env="development"] [data-placeholder-link] {
   outline: 1px dashed oklch(0.8 0.17 80);
   outline-offset: 2px;
-}
-
-/* Unfilled {PLACEHOLDER: ...} values rendered on the page (see ContentText). */
-.placeholder-text {
-  border: 1px dashed oklch(0.8 0.17 80 / 0.7);
-  border-radius: 4px;
-  padding: 0 0.3em;
-  color: oklch(0.85 0.12 80);
-  font-family: var(--font-geist-mono), ui-monospace, monospace;
-  font-size: 0.85em;
 }
 
 /* Notes for Shree that only show in development. */

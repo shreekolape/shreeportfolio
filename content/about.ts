@@ -21,11 +21,12 @@ export const about = {
     label: "About · Golden hour",
   } satisfies Media,
 
+  /** Portrait rendered from the 3D character (head and shoulders, studio light). */
   photo: {
     type: "image",
-    src: null, // {PLACEHOLDER: photo file in /public}
-    alt: "{PLACEHOLDER: photo alt text}",
-    label: "Shree · Photo",
+    src: "/about/portrait.webp",
+    alt: "Stylised 3D portrait of Shree in a black hoodie and glasses.",
+    label: "Shree · Portrait",
   } satisfies Media,
 
   sections: {

@@ -36,6 +36,6 @@ export const contact = {
 
   resume: {
     label: "Download résumé",
-    href: "{PLACEHOLDER: résumé PDF path, e.g. /resume.pdf}",
+    href: "/resume/Shree-Kolape-Resume.pdf",
   },
 } as const;

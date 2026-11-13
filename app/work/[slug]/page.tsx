@@ -4,10 +4,9 @@ import { notFound } from "next/navigation";
 import { getNextProject, getProject, projects } from "@/content/projects";
 import { caseStudyLabels as L } from "@/content/labels";
 import type { WorkStatus } from "@/content/types";
-import { isPlaceholder } from "@/lib/links";
 import { pageMetadata } from "@/lib/metadata";
-import { ContentText } from "@/components/ui/ContentText";
 import { MediaFrame } from "@/components/ui/MediaFrame";
+import { ProjectCover } from "@/components/ui/ProjectCover";
 import { SmartLink } from "@/components/ui/SmartLink";
 import { Tag } from "@/components/ui/Tag";
 import { TransitionLink } from "@/components/transitions/TransitionLink";
@@ -32,7 +31,6 @@ function Section({ title, children }: { title: string; children: ReactNode }) {
 }
 
 function StatusBadge({ status }: { status: WorkStatus }) {
-  if (isPlaceholder(status)) return <ContentText value={status} className="text-[11px]" />;
   return (
     <Tag className={status === "Shipped" ? "border-accent text-accent" : undefined}>{status}</Tag>
   );
@@ -51,6 +49,7 @@ export default async function CaseStudyPage({ params }: PageProps<"/work/[slug]"
     { label: L.status, value: project.status },
   ];
   const showRepo = Boolean(project.repoUrl);
+  const hasLinks = project.liveUrl !== null || showRepo || Boolean(project.sourcePrivate);
 
   return (
     <article className="wrap pb-16 pt-[calc(var(--header-h)+5rem)] sm:pt-[calc(var(--header-h)+8rem)]">
@@ -69,15 +68,16 @@ export default async function CaseStudyPage({ params }: PageProps<"/work/[slug]"
           {meta.map((m) => (
             <div key={m.label}>
               <dt className="font-mono text-[11px] uppercase tracking-widest text-subtle">{m.label}</dt>
-              <dd className="mt-2 text-sm leading-relaxed text-fg">
-                <ContentText value={m.value} />
-              </dd>
+              <dd className="mt-2 text-sm leading-relaxed text-fg">{m.value}</dd>
             </div>
           ))}
         </dl>
 
-        {(project.liveUrl !== null || showRepo) && (
-          <ul className="mt-8 flex flex-wrap gap-3">
+        {hasLinks && (
+          <ul aria-label={L.links} className="mt-8 flex flex-wrap items-center gap-3">
+            <li className="mr-2 font-mono text-[11px] uppercase tracking-widest text-subtle" aria-hidden="true">
+              {L.links}
+            </li>
             {project.liveUrl !== null && (
               <li>
                 <SmartLink
@@ -98,6 +98,7 @@ export default async function CaseStudyPage({ params }: PageProps<"/work/[slug]"
                 </SmartLink>
               </li>
             )}
+            {project.sourcePrivate && <li className="text-sm text-muted">{L.privateSource}</li>}
           </ul>
         )}
       </header>
@@ -108,7 +109,7 @@ export default async function CaseStudyPage({ params }: PageProps<"/work/[slug]"
         </p>
       )}
 
-      <MediaFrame media={project.cover} priority sizes="(min-width: 1280px) 1216px, 100vw" className="mt-12 sm:mt-16" />
+      <ProjectCover project={project} priority sizes="(min-width: 1280px) 1216px, 100vw" className="mt-12 sm:mt-16" />
 
       <div className="mt-12 sm:mt-20">
         <Section title={L.overview}>
@@ -157,9 +158,7 @@ export default async function CaseStudyPage({ params }: PageProps<"/work/[slug]"
                     </div>
                     <div>
                       <dt className="font-mono text-[11px] uppercase tracking-widest text-subtle">{L.approach}</dt>
-                      <dd className="mt-1.5 leading-relaxed text-muted">
-                        <ContentText value={c.approach} />
-                      </dd>
+                      <dd className="mt-1.5 leading-relaxed text-muted">{c.approach}</dd>
                     </div>
                   </dl>
                 </li>
@@ -176,10 +175,13 @@ export default async function CaseStudyPage({ params }: PageProps<"/work/[slug]"
 
         {project.gallery.length > 0 && (
           <Section title={L.gallery}>
-            <ul className="grid gap-4 sm:grid-cols-2">
+            <ul className="grid gap-x-4 gap-y-8 sm:grid-cols-2">
               {project.gallery.map((media) => (
-                <li key={media.label}>
-                  <MediaFrame media={media} sizes="(min-width: 768px) 40vw, 100vw" />
+                <li key={media.src ?? media.label}>
+                  <figure>
+                    <MediaFrame media={media} aspect="16 / 9" sizes="(min-width: 768px) 40vw, 100vw" />
+                    <figcaption className="mt-3 font-mono text-xs text-muted">{media.alt}</figcaption>
+                  </figure>
                 </li>
               ))}
             </ul>
@@ -188,9 +190,7 @@ export default async function CaseStudyPage({ params }: PageProps<"/work/[slug]"
 
         {cs.outcome && (
           <Section title={L.outcome}>
-            <p className="max-w-3xl text-lg leading-relaxed">
-              <ContentText value={cs.outcome} />
-            </p>
+            <p className="max-w-3xl text-lg leading-relaxed">{cs.outcome}</p>
           </Section>
         )}
       </div>

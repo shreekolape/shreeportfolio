@@ -1,5 +1,6 @@
 import Image from "next/image";
 import type { Media } from "@/content/types";
+import { TypographicCover } from "./TypographicCover";
 
 type MediaFrameProps = {
   media: Media;
@@ -11,8 +12,8 @@ type MediaFrameProps = {
 };
 
 /**
- * Image, video or (when `src` is null) a neutral gradient placeholder that
- * shows what it stands for, e.g. "VIVIN · Admin import screen".
+ * Image, video or (when `src` is null) a typographic cover built from the
+ * label, so a missing file never shows as an empty block.
  */
 export function MediaFrame({
   media,
@@ -26,22 +27,7 @@ export function MediaFrame({
     .join(" ");
 
   if (!media.src) {
-    return (
-      <div
-        role="img"
-        aria-label={media.alt}
-        className={frame}
-        style={{
-          aspectRatio: aspect,
-          backgroundImage:
-            "radial-gradient(120% 90% at 15% 10%, rgb(255 255 255 / 0.07), transparent 60%), linear-gradient(135deg, #18181b, #0f0f11)",
-        }}
-      >
-        <span className="absolute inset-0 flex items-center justify-center p-4 text-center font-mono text-[11px] uppercase tracking-wider text-subtle">
-          {media.label}
-        </span>
-      </div>
-    );
+    return <TypographicCover title={media.label} aspect={aspect} className={className} />;
   }
 
   if (media.type === "video") {

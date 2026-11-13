@@ -41,6 +41,9 @@ function DevCameraRig({ view }: { view: DevView }) {
 
 export default function DevCharacterScene({ view }: { view: DevView }) {
   const start = DEV_VIEWS[view];
+  // ?bg=<hex> overrides the background (e.g. the site's dark tone for the About portrait).
+  const bgParam = new URLSearchParams(window.location.search).get("bg");
+  const bg = bgParam && /^[0-9a-f]{6}$/i.test(bgParam) ? `#${bgParam}` : BG;
   return (
     <Canvas
       dpr={[1, render.maxDpr]}
@@ -48,7 +51,7 @@ export default function DevCharacterScene({ view }: { view: DevView }) {
       gl={{ antialias: true, powerPreference: "high-performance" }}
       onCreated={({ camera }) => camera.lookAt(...start.target)}
     >
-      <color attach="background" args={[BG]} />
+      <color attach="background" args={[bg]} />
       <StudioLights />
       <DevCameraRig view={view} />
       <Character />

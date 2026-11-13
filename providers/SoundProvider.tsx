@@ -6,7 +6,7 @@ import { getSoundEnabled, setSoundEnabled, subscribeSound } from "@/lib/soundSto
 
 export type SoundName = "click" | "hover" | "toggle-on" | "toggle-off";
 
-/** Placeholder clips; see public/sounds/README.md. */
+/** Short, quiet UI clips (35–120 ms); see public/sounds/README.md. */
 const SOUNDS: Record<SoundName, { src: string; volume: number }> = {
   click: { src: "/sounds/click.wav", volume: 0.3 },
   hover: { src: "/sounds/hover.wav", volume: 0.12 },

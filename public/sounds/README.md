@@ -1,9 +1,8 @@
 # UI sounds
 
-Placeholder clips: short synthesized blips, generated so the sound system works end to end.
-Replace them with final sounds (same file names), or change the paths in
-`providers/SoundProvider.tsx` → `SOUNDS`. Keep each clip short (under ~150 ms) and quiet.
-Sound is off by default; visitors turn it on with the header toggle.
+Short synthesized blips (35–120 ms), played at 12–35% volume. To change them, replace the files
+(same names) or the paths in `providers/SoundProvider.tsx` → `SOUNDS`. Keep each clip short
+(under ~150 ms) and quiet. Sound is off by default; visitors turn it on with the header toggle.
 
 | File             | Used for                                                                 |
 | ---------------- | ------------------------------------------------------------------------ |

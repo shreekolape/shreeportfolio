@@ -1,6 +1,6 @@
 ﻿"use client";
 
-// TEMPORARY (remove before the final commit): ?debug=bounds shows obstacle
+// Development only (see SceneCanvas): ?debug=bounds shows obstacle
 // boxes (grey) and the character's collision volumes (green, red on contact),
 // and exposes window.__sceneCheck(), which sweeps every state + transition.
 // Extra debug-only params: &state=<sleep|wake|type|idle|wave> locks a pose,
