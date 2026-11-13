@@ -10,6 +10,8 @@ import { aimAt, placeSegment } from "./placeSegment";
 import { useScreenMaterial } from "./useScreenMaterial";
 import { accentColor } from "./accent";
 import { Character } from "./Character";
+import { Window } from "./Window";
+import { lampFactor, steamOpacity } from "./dayCycle";
 
 // Placeholder desk set + character, all built from sceneDims.
 
@@ -19,12 +21,56 @@ function Clay({ color = palette.clay, ...props }: { color?: string } & ThreeElem
   return <meshStandardMaterial color={color} roughness={0.85} metalness={0} {...props} />;
 }
 
+/** Soft rising wisps above the mug; only visible at sunrise and day (dayCycle.steamOpacity). */
+function Steam({ position }: { position: [number, number, number] }) {
+  const group = useRef<THREE.Group>(null);
+  const mats = useRef<(THREE.MeshBasicMaterial | null)[]>([]);
+
+  useFrame(({ clock }) => {
+    const opacity = steamOpacity();
+    const group_ = group.current;
+    if (!group_) return;
+    group_.children.forEach((child, i) => {
+      const mesh = child as THREE.Mesh;
+      const speed = 0.18 + i * 0.05;
+      const cycle = 1.6 + i * 0.3;
+      const h = ((clock.elapsedTime * speed + i * 0.6) % cycle) / cycle;
+      mesh.position.set(Math.sin(clock.elapsedTime * 0.9 + i) * 0.02 * h, h * 0.32, 0);
+      mesh.scale.setScalar(0.6 + h * 1.3);
+      const mat = mats.current[i];
+      if (mat) mat.opacity = opacity * (1 - h) * 0.75;
+    });
+  });
+
+  return (
+    <group ref={group} position={position}>
+      {[0, 1, 2].map((i) => (
+        <mesh key={i}>
+          <sphereGeometry args={[0.026, 8, 8]} />
+          <meshBasicMaterial
+            ref={(m) => {
+              mats.current[i] = m;
+            }}
+            color="#ffffff"
+            transparent
+            opacity={0}
+            depthWrite={false}
+            toneMapped={false}
+          />
+        </mesh>
+      ))}
+    </group>
+  );
+}
+
 function Desk() {
   const screen = useScreenMaterial();
   const bulb = useRef<THREE.MeshBasicMaterial>(null);
 
   useFrame(() => {
-    bulb.current?.color.copy(accentColor());
+    if (bulb.current) {
+      bulb.current.color.copy(accentColor()).multiplyScalar(0.15 + 0.85 * lampFactor());
+    }
   });
 
   return (
@@ -79,6 +125,7 @@ function Desk() {
         <cylinderGeometry args={[0.04, 0.037, 0.1, 20]} />
         <Clay color={palette.object} />
       </mesh>
+      <Steam position={[0.45, desk.top + 0.1, 0.05]} />
       <mesh position={[0.55, desk.top + 0.02, -0.14]} rotation={[0, 0.2, 0]}>
         <boxGeometry args={[0.26, 0.04, 0.19]} />
         <Clay color="#3d3b42" />
@@ -181,6 +228,7 @@ export function PlaceholderDesk() {
       <Desk />
       <Chair />
       <Character />
+      <Window />
     </group>
   );
 }

@@ -1,7 +1,7 @@
 "use client";
 
-import { Suspense, useEffect, useRef } from "react";
-import { Canvas, useFrame } from "@react-three/fiber";
+import { Suspense, useEffect, useMemo, useRef } from "react";
+import { Canvas, useFrame, useThree } from "@react-three/fiber";
 import { useProgress } from "@react-three/drei";
 import * as THREE from "three";
 import { sceneState, setSceneLoad } from "@/lib/sceneStore";
@@ -11,12 +11,25 @@ import { ModelDesk } from "./ModelDesk";
 import { accentColor, accentGlow } from "./accent";
 import { DebugBounds } from "./DebugBounds";
 import { dims, lamp as lampDims } from "./sceneDims";
+import { ambientFactor, exposureFactor, keyLightColor, keyLightFactor, lampFactor, sunVisibility } from "./dayCycle";
 
-/** Monitor + lamp glow follow the live accent; intensity rises with scroll velocity. */
+/**
+ * Monitor glow and the rim light follow the live accent (unchanged); the
+ * ambient/key/window-beam lights and the lamp follow the day cycle instead
+ * (midnight → sunrise → day → evening → midnight), driven by Home's scroll.
+ * On pages without a day cycle, `dayCycle.ts` reads a steady default `t`.
+ */
 function Lights() {
   const monitor = useRef<THREE.PointLight>(null);
   const lamp = useRef<THREE.PointLight>(null);
   const rim = useRef<THREE.SpotLight>(null);
+  const ambient = useRef<THREE.AmbientLight>(null);
+  const hemi = useRef<THREE.HemisphereLight>(null);
+  const key = useRef<THREE.DirectionalLight>(null);
+  const fill = useRef<THREE.DirectionalLight>(null);
+  const windowBeam = useRef<THREE.DirectionalLight>(null);
+  // Directional lights only aim at `target` once it's part of the scene graph (see the <primitive> below).
+  const windowBeamTarget = useMemo(() => new THREE.Object3D(), []);
 
   useFrame(() => {
     const color = accentColor();
@@ -25,23 +38,48 @@ function Lights() {
       monitor.current.color.copy(color);
       monitor.current.intensity = 1.4 + glow * 2.2;
     }
-    if (lamp.current) {
-      lamp.current.color.copy(color);
-      lamp.current.intensity = 1.1 + glow * 1.4;
-    }
     if (rim.current) {
       rim.current.color.copy(color);
       rim.current.intensity = 5 + glow * 4;
+    }
+
+    const keyFactor = keyLightFactor();
+    const ambFactor = ambientFactor();
+    const sunColor = keyLightColor();
+    if (ambient.current) ambient.current.intensity = 0.45 * ambFactor;
+    if (hemi.current) hemi.current.intensity = 0.5 * ambFactor;
+    if (key.current) {
+      key.current.intensity = 0.95 * keyFactor;
+      key.current.color.copy(sunColor);
+    }
+    if (fill.current) fill.current.intensity = 0.6 * (0.6 + 0.4 * keyFactor);
+    if (windowBeam.current) {
+      windowBeam.current.intensity = 2.2 * sunVisibility();
+      windowBeam.current.color.copy(sunColor);
+    }
+
+    if (lamp.current) {
+      const lampOn = lampFactor();
+      lamp.current.color.copy(color);
+      lamp.current.intensity = (1.1 + glow * 1.4) * (0.08 + 0.92 * lampOn);
     }
   });
 
   return (
     <>
-      <ambientLight intensity={0.45} color="#9aa0b4" />
-      <hemisphereLight args={["#8a90a8", palette.background, 0.5]} />
+      <ambientLight ref={ambient} intensity={0.45} color="#9aa0b4" />
+      <hemisphereLight ref={hemi} args={["#8a90a8", palette.background, 0.5]} />
       {/* Soft key from the camera side, cool rim from behind-right. */}
-      <directionalLight position={[-3, 4, 3]} intensity={0.95} color="#ece6dc" />
-      <directionalLight position={[2.5, 2.5, -2.5]} intensity={0.6} color="#aab4ff" />
+      <directionalLight ref={key} position={[-3, 4, 3]} intensity={0.95} color="#ece6dc" />
+      <directionalLight ref={fill} position={[2.5, 2.5, -2.5]} intensity={0.6} color="#aab4ff" />
+      {/* Sunlight beam through the window, behind the desk. */}
+      <directionalLight
+        ref={windowBeam}
+        target={windowBeamTarget}
+        position={[0, dims.window.centerY, dims.window.z - 1]}
+        intensity={0}
+      />
+      <primitive object={windowBeamTarget} position={[0, dims.monitorCenterY, dims.monitor.z]} />
       <pointLight ref={monitor} position={[0, 1.15, 0.12]} distance={3} decay={1.6} />
       <pointLight ref={lamp} position={lampDims.head} distance={2.4} decay={1.6} />
       {/* Accent rim from behind-right so the black hoodie keeps its outline. */}
@@ -56,6 +94,18 @@ function Lights() {
       />
     </>
   );
+}
+
+/** Renderer-wide exposure follows the day cycle: the most reliable way to read
+ *  "day" as clearly brighter than night against ACES tone-mapping's highlight
+ *  compression, on top of the per-light intensities in `Lights()`. */
+function ExposureRig() {
+  const gl = useThree((s) => s.gl);
+  useFrame(() => {
+    // eslint-disable-next-line react-hooks/immutability -- renderer property mutated in the frame loop by design
+    gl.toneMappingExposure = exposureFactor();
+  });
+  return null;
 }
 
 /**
@@ -138,6 +188,7 @@ export default function SceneCanvas() {
       <color attach="background" args={[palette.background]} />
       <fog attach="fog" args={[palette.background, 4.5, 10]} />
       <Lights />
+      <ExposureRig />
       <CameraRig />
       <LoadReporter />
       <Suspense fallback={null}>

@@ -6,6 +6,7 @@ import { SmoothScrollProvider } from "@/providers/SmoothScrollProvider";
 import { AccentProvider } from "@/providers/AccentProvider";
 import { SoundProvider } from "@/providers/SoundProvider";
 import { TransitionProvider } from "@/providers/TransitionProvider";
+import { DayCycleProvider } from "@/providers/DayCycleProvider";
 
 export function Providers({ children }: { children: ReactNode }) {
   return (
@@ -13,7 +14,9 @@ export function Providers({ children }: { children: ReactNode }) {
       <SmoothScrollProvider>
         <AccentProvider>
           <SoundProvider>
-            <TransitionProvider>{children}</TransitionProvider>
+            <TransitionProvider>
+              <DayCycleProvider>{children}</DayCycleProvider>
+            </TransitionProvider>
           </SoundProvider>
         </AccentProvider>
       </SmoothScrollProvider>

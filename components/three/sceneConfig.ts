@@ -69,4 +69,6 @@ export const palette = {
   chair: "#232327",
   device: "#18181b",
   object: "#55535a",
+  wall: "#141418",
+  windowFrame: "#1d1d22",
 };
