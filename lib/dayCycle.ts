@@ -58,3 +58,32 @@ export function sampleHexStops(t: number, hexes: readonly [string, string, strin
 
 /** Page background tint per B2: stays dark at every point, WCAG AA unaffected. */
 export const BG_TINT_STOPS = ["#0B0D12", "#15110F", "#12161C", "#16120D", "#0B0D12"] as const;
+
+export type RouteTheme = {
+  /** Fixed time of day for routes without a scroll-driven cycle (null on Home). */
+  t: number | null;
+  /** Fixed page tint (null on Home, where it follows scroll). */
+  bg: string | null;
+  /** Transition overlay: a sky gradient for the destination's time of day. */
+  curtain: string;
+};
+
+const CURTAIN = {
+  midnight: "linear-gradient(180deg, #05060f 0%, #0b0e1c 55%, #1a2040 100%)",
+  day: "linear-gradient(180deg, #2f8fdb 0%, #78bdee 55%, #c4e6ff 100%)",
+  golden: "linear-gradient(180deg, #2a1f3a 0%, #b4563a 55%, #ff9d52 100%)",
+  night: "linear-gradient(180deg, #04050c 0%, #0a0d1a 60%, #141a33 100%)",
+};
+
+/**
+ * Each route's time of day (B3/B4). Home runs the full scroll-driven cycle;
+ * Work and case studies are "working hours", About is golden hour, Contact
+ * is night. Unknown routes (404, dev tools) fall back to midnight.
+ */
+export function routeTheme(pathname: string): RouteTheme {
+  if (pathname === "/") return { t: null, bg: null, curtain: CURTAIN.midnight };
+  if (pathname === "/work" || pathname.startsWith("/work/")) return { t: 0.5, bg: BG_TINT_STOPS[2], curtain: CURTAIN.day };
+  if (pathname === "/about") return { t: 0.75, bg: BG_TINT_STOPS[3], curtain: CURTAIN.golden };
+  if (pathname === "/contact") return { t: 0, bg: BG_TINT_STOPS[0], curtain: CURTAIN.night };
+  return { t: null, bg: null, curtain: CURTAIN.midnight };
+}

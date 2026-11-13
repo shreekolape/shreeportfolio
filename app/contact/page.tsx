@@ -2,6 +2,7 @@ import { contact } from "@/content/contact";
 import { site } from "@/content/site";
 import { pageMetadata } from "@/lib/metadata";
 import { ContactForm } from "@/components/contact/ContactForm";
+import { PageScene } from "@/components/three/PageScene";
 import { SmartLink } from "@/components/ui/SmartLink";
 import { StatusLine } from "@/components/ui/StatusLine";
 
@@ -24,6 +25,8 @@ export default function ContactPage() {
         <ContactForm />
 
         <aside aria-label="Contact details" className="lg:border-l lg:border-line lg:pl-12">
+          {/* Night: at the desk, checking his phone (3D close-up, or its still). */}
+          <PageScene state="phone" shot="contact" fallback={contact.sceneFallback} className="mb-10 w-full max-w-sm" />
           <ul className="grid gap-4">
             <li>
               <SmartLink href={`mailto:${email}`} data-cursor="Say hi" className={linkClass}>

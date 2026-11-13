@@ -4,7 +4,7 @@ import { site } from "@/content/site";
 import { pageMetadata } from "@/lib/metadata";
 import { education, experience } from "@/content/experience";
 import { skillTiers } from "@/content/skills";
-import { MediaFrame } from "@/components/ui/MediaFrame";
+import { PageScene } from "@/components/three/PageScene";
 import { Tag } from "@/components/ui/Tag";
 
 export const metadata = pageMetadata({ title: about.heading, description: site.pitch, path: "/about" });
@@ -25,7 +25,7 @@ function Section({ id, title, children }: { id: string; title: string; children:
 }
 
 export default function AboutPage() {
-  const { intro, photo, sections, howIWork } = about;
+  const { intro, sections, howIWork } = about;
 
   return (
     <div className="wrap pb-16 pt-[calc(var(--header-h)+5rem)] sm:pt-[calc(var(--header-h)+8rem)]">
@@ -40,7 +40,8 @@ export default function AboutPage() {
             ))}
           </div>
         </div>
-        <MediaFrame media={photo} aspect="4 / 5" sizes="(min-width: 768px) 35vw, 100vw" className="max-w-sm md:max-w-none" />
+        {/* Golden hour: leaning back, relaxed (3D close-up, or its still). */}
+        <PageScene state="relax" shot="about" fallback={about.sceneFallback} className="w-full max-w-sm md:max-w-none" />
       </div>
 
       <Section id="education" title={sections.education}>

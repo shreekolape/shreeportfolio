@@ -118,6 +118,10 @@ html.is-preloading {
 html[data-no3d] .no3d-only {
   display: block;
 }
+/* A 3D panel whose WebGL failed must not cover its fallback still. */
+html[data-no3d] .scene-panel {
+  display: none;
+}
 /* With the scene on, home content keeps to the left; the desk sits right. */
 @media (min-width: 1024px) {
   html[data-scene3d] .scene-aside {

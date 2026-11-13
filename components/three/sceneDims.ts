@@ -55,6 +55,17 @@ const room = { backWallZ: -0.95 };
 const windowPane = { z: room.backWallZ + 0.01, centerY: 1.45, width: 1.3, height: 0.95 };
 
 /**
+ * Phone: face down on the desk right of the monitor stand (clear of the
+ * keyboard, mouse, mug and books), or in the right hand in the `phone` pose.
+ * Local frame: x across, y along the long edge, +z out of the screen.
+ */
+const phone = { width: 0.072, length: 0.15, thickness: 0.009, desk: { x: 0.25, z: -0.08, yaw: 0.3 } };
+const phoneDeskHalf = {
+  x: (phone.width / 2) * Math.cos(phone.desk.yaw) + (phone.length / 2) * Math.sin(phone.desk.yaw),
+  z: (phone.width / 2) * Math.sin(phone.desk.yaw) + (phone.length / 2) * Math.cos(phone.desk.yaw),
+};
+
+/**
  * Character proportions (slim build, ~1.8 m standing, head ≈ 1/7 of that).
  * Spine: hips → waist (lower) → neck base (upper), so the back can hunch.
  * Hips are pinned to the seat; thighs lie on it, knees at 90°, shins vertical.
@@ -117,6 +128,7 @@ export const dims = {
   monitorCenterY,
   room,
   window: windowPane,
+  phone,
   character,
   hips,
 } as const;
@@ -143,6 +155,15 @@ export const sceneBoxes: Box[] = [
     monitor.depth,
   ),
   box("monitor stand", 0, desk.top + monitor.lift / 2, monitor.z - 0.01, 0.05, monitor.lift, 0.04),
+  box(
+    "desk phone",
+    phone.desk.x,
+    desk.top + phone.thickness / 2,
+    phone.desk.z,
+    phoneDeskHalf.x * 2,
+    phone.thickness,
+    phoneDeskHalf.z * 2,
+  ),
   box(
     "chair seat",
     0,

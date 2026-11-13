@@ -58,12 +58,13 @@ export const site = {
     line: "Loading pixels. Please don't refresh, they're shy.",
   },
 
-  /** Shown instead of the 3D canvas on mobile, low-power devices and reduced motion. */
+  /** Shown instead of the 3D canvas on mobile, low-power devices and reduced
+   *  motion: a still rendered from the scene itself (midnight, asleep). */
   sceneFallback: {
     type: "image",
-    src: null, // {PLACEHOLDER: pre-rendered still or short muted loop of the desk scene}
-    alt: "{PLACEHOLDER: alt text for the desk scene still}",
-    label: "Desk scene · Pre-rendered fallback",
+    src: "/scenes/home-night.webp",
+    alt: "Illustration of Shree asleep at his desk late at night, monitor and lamp glowing.",
+    label: "Desk scene · Night",
   } satisfies Media,
 
   contact: {

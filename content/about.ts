@@ -13,6 +13,14 @@ export const about = {
     ],
   },
 
+  /** Still of the golden-hour `relax` scene, shown wherever 3D doesn't load. */
+  sceneFallback: {
+    type: "image",
+    src: "/scenes/about-golden-hour.webp",
+    alt: "Illustration of Shree leaning back in his chair at golden hour.",
+    label: "About · Golden hour",
+  } satisfies Media,
+
   photo: {
     type: "image",
     src: null, // {PLACEHOLDER: photo file in /public}

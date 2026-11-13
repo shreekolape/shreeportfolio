@@ -1,40 +1,25 @@
 "use client";
 
-import { useEffect, useState, type ReactNode } from "react";
+import { useEffect, type ReactNode } from "react";
 import { gsap } from "@/lib/gsap";
-import { BG_TINT_STOPS, sampleHexStops, SECTION_DAY_T } from "@/lib/dayCycle";
+import { BG_TINT_STOPS, routeTheme, sampleHexStops, SECTION_DAY_T } from "@/lib/dayCycle";
 import { useLenis } from "./SmoothScrollProvider";
 import { usePageTransition } from "./TransitionProvider";
 
-/** Live time-of-day (0–1): midnight → sunrise → day → evening → midnight. Only
- *  this provider writes it on Home; fixed-theme pages set it directly (B3). */
+/** Live time-of-day (0–1): midnight → sunrise → day → evening → midnight.
+ *  Only this provider writes it. */
 export const liveDayCycle = { t: 0 };
-
-/**
- * Pins the day cycle and page tint to a fixed point, synchronously during
- * this component's first render — before any child (e.g. a 3D scene) can
- * read `liveDayCycle.t`. For pages with one fixed lighting theme instead of
- * a scroll-driven cycle: About's golden hour, Contact's night, Work's
- * "working hours". Like `useSceneReset`, a `useEffect` would run too late.
- */
-export function useFixedDayTheme(t: number, bg: string): void {
-  useState(() => {
-    liveDayCycle.t = t;
-    document.documentElement.style.setProperty("--bg", bg);
-    return null;
-  });
-}
 
 const clamp01 = (n: number) => Math.min(1, Math.max(0, n));
 
 /**
- * Drives `liveDayCycle.t` and the `--bg` page tint from Home's scroll
- * position. Measures each `[data-scene]` section's offset so the keyframes
- * (midnight at the hero, sunrise at the intro, ...) land on the right
- * section regardless of how tall each one renders, not a uniform 1/5th of
- * the page. Runs independent of whether the 3D canvas is mounted, so the
- * tint still follows scroll on mobile and under reduced motion (B5) even
- * though `SceneLayer` never loads the canvas there.
+ * Drives `liveDayCycle.t` and the `--bg` page tint. On Home both follow
+ * scroll: each `[data-scene]` section's offset is measured so the keyframes
+ * (midnight at the hero, sunrise at the intro, ...) land on the right section
+ * regardless of how tall each one renders. Other routes get a fixed time of
+ * day from `routeTheme` (Work: working hours, About: golden hour, Contact:
+ * night). Independent of whether a 3D canvas is mounted, so the tint still
+ * applies on mobile and under reduced motion (B5).
  */
 export function DayCycleProvider({ children }: { children: ReactNode }) {
   const { pathname } = usePageTransition();
@@ -42,8 +27,14 @@ export function DayCycleProvider({ children }: { children: ReactNode }) {
   const isHome = pathname === "/";
 
   useEffect(() => {
-    if (!isHome) return;
     const root = document.documentElement;
+    if (!isHome) {
+      const theme = routeTheme(pathname);
+      if (theme.t !== null) liveDayCycle.t = theme.t;
+      if (theme.bg) root.style.setProperty("--bg", theme.bg);
+      else root.style.removeProperty("--bg");
+      return;
+    }
 
     let stops: { frac: number; t: number }[] = [
       { frac: 0, t: 0 },
@@ -109,7 +100,7 @@ export function DayCycleProvider({ children }: { children: ReactNode }) {
       window.removeEventListener("resize", measure);
       window.removeEventListener("load", measure);
     };
-  }, [isHome, lenis]);
+  }, [isHome, pathname, lenis]);
 
   return children;
 }

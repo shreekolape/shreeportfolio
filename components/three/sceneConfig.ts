@@ -52,9 +52,9 @@ export const shots: Record<Shot, { position: Vec3; target: Vec3; shift: number }
   orbit: { position: [-2.85, 1.75, 1.55], target: [0, 0.95, 0.3], shift: 0.17 },
   footer: { position: [-2.6, 1.5, 1.75], target: [0, 1.05, 0.7], shift: 0.14 },
   // Small close-ups for About (relax) and Contact (phone): tighter, centred on the
-  // upper body/head rather than the whole desk.
-  about: { position: [-1.05, 1.55, 1.35], target: [-0.05, 1.2, 0.55], shift: 0.1 },
-  contact: { position: [-0.95, 1.45, 1.2], target: [0, 1.12, 0.5], shift: 0.1 },
+  // upper body/head rather than the whole desk. Rendered as panels, so no shift.
+  about: { position: [-2.35, 1.5, 1.85], target: [0.1, 1.05, 0.3], shift: 0 },
+  contact: { position: [-1.5, 1.45, 1.75], target: [0.05, 1.0, 0.35], shift: 0 },
 };
 
 export const render = {

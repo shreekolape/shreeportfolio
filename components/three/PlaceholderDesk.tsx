@@ -9,9 +9,11 @@ import { deskLegPositions, dims, lamp } from "./sceneDims";
 import { aimAt, placeSegment } from "./placeSegment";
 import { useScreenMaterial } from "./useScreenMaterial";
 import { accentColor } from "./accent";
-import { Character } from "./Character";
+import { Character, rigDebug } from "./Character";
 import { Window } from "./Window";
 import { lampFactor, steamOpacity } from "./dayCycle";
+import { phoneInHand } from "./rig";
+import { sceneState } from "@/lib/sceneStore";
 
 // Placeholder desk set + character, all built from sceneDims.
 
@@ -59,6 +61,55 @@ function Steam({ position }: { position: [number, number, number] }) {
           />
         </mesh>
       ))}
+    </group>
+  );
+}
+
+const { phone } = dims;
+const PHONE_DESK_POS = new THREE.Vector3(phone.desk.x, desk.top + phone.thickness / 2, phone.desk.z);
+// Face down: rotate the screen (+z) to point at the desk, then turn it on the desk.
+const PHONE_DESK_Q = new THREE.Quaternion()
+  .setFromAxisAngle(new THREE.Vector3(0, 1, 0), phone.desk.yaw)
+  .multiply(new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(1, 0, 0), Math.PI / 2));
+
+/**
+ * The phone: face down on the desk in every pose except `phone`, where it
+ * sits in the right hand with the screen turned toward his face and a soft
+ * glow from the screen lighting it (see rig.ts `phoneInHand`).
+ */
+function Phone() {
+  const group = useRef<THREE.Group>(null);
+  const screen = useRef<THREE.Mesh>(null);
+  const glow = useRef<THREE.PointLight>(null);
+
+  useFrame(() => {
+    const g = group.current;
+    if (!g) return;
+    const solved = rigDebug.latest;
+    const held = sceneState.state === "phone" && solved !== null;
+    if (held) {
+      const { center, q } = phoneInHand(solved);
+      g.position.copy(center);
+      g.quaternion.copy(q);
+    } else {
+      g.position.copy(PHONE_DESK_POS);
+      g.quaternion.copy(PHONE_DESK_Q);
+    }
+    if (screen.current) screen.current.visible = held;
+    if (glow.current) glow.current.intensity = held ? 0.9 : 0;
+  });
+
+  return (
+    <group ref={group}>
+      <RoundedBox args={[phone.width, phone.length, phone.thickness]} radius={0.004} smoothness={3}>
+        <Clay color="#141417" roughness={0.45} />
+      </RoundedBox>
+      <mesh ref={screen} position={[0, 0, phone.thickness / 2 + 0.0006]} visible={false}>
+        <planeGeometry args={[phone.width - 0.008, phone.length - 0.014]} />
+        <meshBasicMaterial color="#d5e3ff" toneMapped={false} />
+      </mesh>
+      {/* Screen glow on his face, only while he's looking at it. */}
+      <pointLight ref={glow} position={[0, 0, 0.05]} color="#bcd2ff" intensity={0} distance={0.7} decay={2} />
     </group>
   );
 }
@@ -228,6 +279,8 @@ export function PlaceholderDesk() {
       <Desk />
       <Chair />
       <Character />
+      {/* After Character, so it reads this frame's solved hand. */}
+      <Phone />
       <Window />
     </group>
   );

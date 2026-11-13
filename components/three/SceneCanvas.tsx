@@ -111,12 +111,14 @@ function ExposureRig() {
 /**
  * Eases the camera toward the current shot; slow orbit on "orbit", subtle
  * pointer parallax. The shot's `shift` is applied as a lens film offset.
+ * In a `panel` (About/Contact close-ups, rendered stills) the image stays
+ * centred and still: no lens shift, no parallax.
  */
-function CameraRig() {
+function CameraRig({ panel }: { panel: boolean }) {
   const target = useRef(new THREE.Vector3(...shots[sceneState.shot].target));
   const goalPos = useRef(new THREE.Vector3());
   const goalTarget = useRef(new THREE.Vector3());
-  const shift = useRef(shots[sceneState.shot].shift);
+  const shift = useRef(panel ? 0 : shots[sceneState.shot].shift);
 
   useFrame(({ camera, clock, pointer, size }, delta) => {
     const shot = shots[sceneState.shot];
@@ -126,7 +128,7 @@ function CameraRig() {
     const look = goalTarget.current.set(...shot.target);
 
     // Content is only pushed left at ≥1024px; on tablets keep the scene nearly centred.
-    const goalShift = size.width >= 1024 ? shot.shift : shot.shift * 0.35;
+    const goalShift = panel ? 0 : size.width >= 1024 ? shot.shift : shot.shift * 0.35;
     shift.current += (goalShift - shift.current) * k;
     if (camera instanceof THREE.PerspectiveCamera) {
       const aspect = size.width / size.height;
@@ -140,8 +142,10 @@ function CameraRig() {
       pos.x += Math.sin(a) * 0.25;
       pos.z += Math.cos(a) * 0.2;
     }
-    pos.x += pointer.x * 0.06;
-    pos.y += pointer.y * 0.04;
+    if (!panel) {
+      pos.x += pointer.x * 0.06;
+      pos.y += pointer.y * 0.04;
+    }
 
     camera.position.lerp(pos, k);
     target.current.lerp(look, k);
@@ -171,7 +175,7 @@ function FirstFrame() {
   return null;
 }
 
-export default function SceneCanvas() {
+export default function SceneCanvas({ panel = false }: { panel?: boolean }) {
   const start = shots[sceneState.shot];
   // TEMPORARY debug toggle (?debug=bounds); removed before the final commit.
   const debugBounds = new URLSearchParams(window.location.search).get("debug") === "bounds";
@@ -189,7 +193,7 @@ export default function SceneCanvas() {
       <fog attach="fog" args={[palette.background, 4.5, 10]} />
       <Lights />
       <ExposureRig />
-      <CameraRig />
+      <CameraRig panel={panel} />
       <LoadReporter />
       <Suspense fallback={null}>
         {model.enabled ? <ModelDesk /> : <PlaceholderDesk />}

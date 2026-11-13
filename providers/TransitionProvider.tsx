@@ -12,6 +12,7 @@ import {
 } from "react";
 import { featuredProjects } from "@/content/projects";
 import { site } from "@/content/site";
+import { routeTheme } from "@/lib/dayCycle";
 import { gsap, ScrollTrigger } from "@/lib/gsap";
 import { appState, ease } from "@/lib/motion";
 import { useLenis } from "./SmoothScrollProvider";
@@ -104,6 +105,8 @@ export function TransitionProvider({ children }: { children: ReactNode }) {
 
       statusRef.current = "covering";
       const curtain = curtainRef.current;
+      // Sky gradient for the destination's time of day (B4); timing below is unchanged.
+      curtain.style.backgroundImage = routeTheme(targetPath).curtain;
       gsap.killTweensOf(curtain);
       gsap.set(curtain, { autoAlpha: 0, pointerEvents: "auto" });
       gsap.to(curtain, {
@@ -147,6 +150,7 @@ export function TransitionProvider({ children }: { children: ReactNode }) {
     // so snap-cover for one frame and reveal quickly rather than leaving a
     // flash of the new page with no transition at all.
     if (reducedMotion || !curtainRef.current) return;
+    curtainRef.current.style.backgroundImage = routeTheme(pathname).curtain;
     gsap.killTweensOf(curtainRef.current);
     gsap.set(curtainRef.current, { autoAlpha: 1, pointerEvents: "auto" });
     const id = requestAnimationFrame(() => reveal(true));

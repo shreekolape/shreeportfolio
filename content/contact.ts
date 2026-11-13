@@ -1,5 +1,15 @@
+import type { Media } from "./types";
+
 // Freelance only. Do not mention jobs or internships here.
 export const contact = {
+  /** Still of the night `phone` scene, shown wherever 3D doesn't load. */
+  sceneFallback: {
+    type: "image",
+    src: "/scenes/contact-night.webp",
+    alt: "Illustration of Shree at his desk at night, looking at his phone.",
+    label: "Contact · Night",
+  } satisfies Media,
+
   heading: "Let's build something.",
   subline: "I'm available for freelance projects: websites, web apps and e-commerce stores.",
 

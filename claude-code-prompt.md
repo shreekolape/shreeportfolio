@@ -63,7 +63,7 @@ Shared across all pages: header nav (Home, Work, About, Contact, sound toggle), 
 
 ### 5.2 Page transitions
 A single `TransitionProvider` + `TransitionLink` drive every internal link (nav, Selected Work, What I Do proof links, "See all work", "More about me", "Next project", footer). Fixed order, so the new page never flashes before the cover:
-1. **Cover:** on click, animate the accent-coloured overlay in (~350ms) before navigating.
+1. **Cover:** on click, animate the overlay in (~350ms) before navigating. The overlay is a sky gradient for the **destination's** time of day: midnight navy (Home), daylight blue (Work and case studies), golden (About), night navy (Contact).
 2. **Navigate:** only then call `router.push()`.
 3. **Wait:** stay opaque until `usePathname()` reflects the new route, plus one `requestAnimationFrame`. Scroll resets to top (Lenis `scrollTo(0, { immediate: true })`) while covered.
 4. **Reveal:** animate the overlay out (~450ms).
@@ -260,7 +260,7 @@ Work-focused, playful in tone but professional. **No personal-life content for n
   > What I enjoy most is the moment a messy process becomes simple: a spreadsheet turns into a dashboard, an enquiry turns into an order, a confusing page turns into one people actually use.
   >
   > Right now I'm finishing my degree, working on a live e-commerce store and taking on freelance projects. Alongside that, I'm learning to build with AI properly (LLMs, retrieval and AI agents) and studying system design, so the next things I build are smarter and still well engineered. And yes, a lot of it happens late at night.
-- **Photo:** {PLACEHOLDER}
+- **Scene (golden hour):** a small 3D close-up of the character leaning back, relaxed (`relax` pose), in the intro's right column; background uses the evening tint. Where 3D doesn't load, a rendered still of the same scene is shown.
 - **Education:** B.E. Computer Engineering · Savitribai Phule Pune University · 2027. **Do not mention any college name.**
 - **Experience timeline:**
   - **Thavare** · Website Development & Maintenance · Jun 2026 to Present
@@ -286,26 +286,33 @@ Work-focused, playful in tone but professional. **No personal-life content for n
 - Form submission: build the UI and a Next.js route handler stub; leave the email provider unconnected with a clear TODO and env var placeholders. **Do not** hard-code any API keys.
 - Also show: email {PLACEHOLDER}, socials (GitHub, LinkedIn) {PLACEHOLDER}, résumé download {PLACEHOLDER}.
 - The status line with live Pune time, the same as in the footer.
+- **Scene (night):** a small 3D close-up above the contact details: lamp on, the character at the desk looking at the phone in his right hand (`phone` pose; screen faces him and softly lights his face). Background uses the night tint. Rendered still where 3D doesn't load.
 - Freelance only. Do not mention jobs or internships.
 
 ---
 
 ## 7. The 3D desk scene
 
-A stylised night-time desk scene that runs through the home page and is driven by scroll.
+A stylised desk scene that runs through the home page and is driven by scroll, through one day: midnight to midnight.
 
-**Style (this keeps it professional):** minimal, clean clay or low-poly look; muted colours plus the shifting neon accent on the monitor glow and lamp. Not cartoonish or anime. Small, believable motion only.
+**Style (this keeps it professional):** minimal, clean clay or low-poly look; muted colours plus the shifting neon accent on the monitor glow. Not cartoonish or anime. Small, believable motion only.
 
-**Scene contents:** a desk, a monitor (its screen is a texture plane for project previews), a keyboard, a lamp, a chair, a few small objects and the character.
+**Scene contents:** a desk, a monitor (its screen is a texture plane for project previews), a keyboard, a lamp, a chair, a mug, books, a phone (face down on the desk except in the `phone` pose), a window with a sky on the back wall, and the character.
 
-**Character states, mapped to scroll with GSAP ScrollTrigger:**
-| Scroll position | State |
-|---|---|
-| Hero | Asleep with his head on the desk; monitor glowing |
-| Intro | Wakes up and stretches; camera eases closer |
-| Selected Work | Typing; camera pushes toward the monitor, which shows the hovered project's preview |
-| What I Do / Stack | Camera orbits slightly; typing idle |
-| Footer | Leans back and waves |
+**Character states and time of day, mapped to scroll:**
+| Scroll position | Time | State |
+|---|---|---|
+| Hero | Midnight | Asleep with his head on the desk; room dark, lamp on, moon in the window |
+| Intro | Sunrise | Wakes up and stretches; warm orange light through the window |
+| Selected Work | Day | Typing in bright daylight; the monitor shows the hovered project's preview |
+| What I Do / Stack | Evening | Golden-hour light, sun setting; camera orbits slightly |
+| Footer | Midnight again | Lamp on, moon out; leans back and waves |
+
+**Day cycle:** a single `timeOfDay` value (0–1) follows Home's scroll, with keyframes on each section's measured position. It drives the window's sky gradient (navy → dawn orange/pink → sky blue → golden amber → navy) and the sun and moon crossing it, the key/ambient lights, a sunlight beam through the window, renderer exposure (day reads clearly bright), the lamp (on at night, off by day) and mug steam (sunrise and day). Everything interpolates smoothly. The page stays dark, with a subtle tint behind the content that follows the same value: night `#0B0D12`, sunrise `#15110F`, day `#12161C`, evening `#16120D` (WCAG AA holds at every point). The scroll-reactive accent is unchanged.
+
+**Other pages:** Work and case studies are "working hours": no 3D, day tint. About is golden hour (`relax` close-up, evening tint). Contact is night (`phone` close-up, night tint). Both close-ups reuse the same character and props with their own camera framing, lazy-load, and fall back to a rendered still. Each route's scene mounts its own canvas, and the pose is pinned before the first frame, so a pose from another route never blends in.
+
+**Clipping check:** only transitions that can actually happen are swept: Home's five states against each other, `relax` and `phone` each on their own (plus the phone in his hand). It must report 0 intersections.
 
 **Implementation:**
 - Load the character and desk as a **GLB from `/public/models/`** (Draco-compressed), with named animation clips: `sleep`, `wake`, `type`, `idle`, `wave`. I'll supply the final model later (Blender or Mixamo).
@@ -317,7 +324,7 @@ A stylised night-time desk scene that runs through the home page and is driven b
 
 ## 8. Performance, mobile and accessibility
 
-- **Mobile and low-power:** below 768px, or when the device is low on memory or cores, **don't load the 3D canvas.** Show a pre-rendered image or short muted looping video of the scene instead (placeholder for now). Selected Work shows inline thumbnails.
+- **Mobile and low-power:** below 768px, or when the device is low on memory or cores, **don't load the 3D canvas.** Show a still rendered from the scene instead, matching each page's time of day (Home: midnight, About: golden hour, Contact: night). The page tint still follows scroll on Home. Selected Work shows inline thumbnails.
 - **`prefers-reduced-motion`:** disable smooth scroll, the 3D animation (show a static frame), page-transition motion and the velocity glow, and keep sound off.
 - Semantic HTML, keyboard-navigable nav and forms, visible focus states, alt text from the data files and sufficient contrast on the dark theme.
 - Target a strong Lighthouse score on mobile: lazy-load heavy assets and use `next/image`.

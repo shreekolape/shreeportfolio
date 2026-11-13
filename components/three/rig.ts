@@ -152,13 +152,14 @@ export const poses: Record<CharacterState, (t: number) => Pose> = {
       yaw: 0.12,
       lean: 0.1,
       hunch: 0.12,
-      headPitch: 0.3 + glanceUp,
-      headYaw: 0.14,
+      headPitch: 0.45 + glanceUp,
+      headYaw: 0.1,
       headRoll: 0,
       handFlat: 0.45,
       curl: 0.7,
       l: { wrist: [-0.16, hipY + 0.17, hipZ - 0.18], pole: [-1, -0.3, 0.4] },
-      r: { wrist: [0.13, shoulderY - 0.1, hipZ - 0.06], pole: [0.4, -1, 0.5] },
+      // Held out in front of the chest, below the eyes (phone: see phoneInHand).
+      r: { wrist: [0.1, shoulderY - 0.12, hipZ - 0.34], pole: [0.5, -1, 0.3] },
     };
   },
 };
@@ -537,6 +538,84 @@ export function solve(pose: Pose): Solved {
   }
 }
 
+// ------------------------------------------------------------------ phone
+
+const P = dims.phone;
+const FINGERS_RADIUS = 0.023; // matches the merged-fingers capsule in Character.tsx
+
+/**
+ * The phone in the right hand (`phone` pose): pressed against the front of
+ * the curled fingers, screen turned toward the eyes, long edge following the
+ * hand. Shared by the renderer and the clipping check so both see the same
+ * phone. Local frame: x across, y along the long edge, +z out of the screen.
+ */
+export function phoneInHand(s: Solved): { center: THREE.Vector3; q: THREE.Quaternion; screenNormal: THREE.Vector3 } {
+  const eyes = new THREE.Vector3(...C.glasses.offset).applyQuaternion(s.headQ).add(s.headCenter);
+  const grip = s.r.knuckle;
+  const normal = eyes.clone().sub(grip).normalize();
+  const along = s.r.handDir.clone().addScaledVector(normal, -s.r.handDir.dot(normal));
+  if (along.lengthSq() < 1e-6) along.copy(UP).addScaledVector(normal, -normal.y);
+  along.normalize();
+  const across = new THREE.Vector3().crossVectors(along, normal).normalize();
+  const q = new THREE.Quaternion().setFromRotationMatrix(basisM.makeBasis(across, along, normal));
+  // Slightly past the knuckles, so the phone's lower edge rests in the curled fingers.
+  const center = grip
+    .clone()
+    .addScaledVector(along, 0.025)
+    .addScaledVector(normal, FINGERS_RADIUS + P.thickness / 2 + 0.001);
+  return { center, q, screenNormal: normal };
+}
+
+/** Sample points on the held phone's surface (corners, faces and edges). */
+function phonePoints(center: THREE.Vector3, q: THREE.Quaternion): THREE.Vector3[] {
+  const hx = P.width / 2;
+  const hy = P.length / 2;
+  const hz = P.thickness / 2;
+  const pts: THREE.Vector3[] = [];
+  const steps = [-1, -0.5, 0, 0.5, 1];
+  for (const u of steps) for (const v of steps) for (const w of [-1, 1]) pts.push(new THREE.Vector3(u * hx, v * hy, w * hz));
+  for (const v of steps) for (const w of [-1, 0, 1]) for (const u of [-1, 1]) pts.push(new THREE.Vector3(u * hx, v * hy, w * hz));
+  for (const u of steps) for (const w of [-1, 0, 1]) for (const v of [-1, 1]) pts.push(new THREE.Vector3(u * hx, v * hy, w * hz));
+  return pts.map((p) => p.applyQuaternion(q).add(center));
+}
+
+const qInv = new THREE.Quaternion();
+const local = new THREE.Vector3();
+/** How deep a point sits inside an ellipsoid (≤ 0 means outside). */
+function pointInEllipsoid(p: THREE.Vector3, part: Part): number {
+  local.copy(p).sub(part.center).applyQuaternion(qInv.copy(part.q).invert());
+  const d = Math.hypot(local.x / part.radii[0], local.y / part.radii[1], local.z / part.radii[2]);
+  return (1 - d) * Math.min(...part.radii);
+}
+
+const segment = new THREE.Line3();
+const closestPt = new THREE.Vector3();
+function pointInCapsule(p: THREE.Vector3, a: THREE.Vector3, b: THREE.Vector3, r: number): number {
+  segment.set(a, b).closestPointToPoint(p, true, closestPt);
+  return r - closestPt.distanceTo(p);
+}
+
+/**
+ * Worst intersection of the held phone with the scene, the head, the torso,
+ * the left arm and the right upper arm/forearm. The right hand itself is
+ * excluded: it is meant to be in contact with the phone.
+ */
+export function phoneHits(s: Solved): Hit {
+  const { center, q } = phoneInHand(s);
+  let worst = NONE;
+  const parts = [...headParts(s), ...torsoParts(s)];
+  for (const p of phonePoints(center, q)) {
+    worst = worse(worst, sphereDepth(p, 0, ["desk phone"]));
+    for (const part of parts) worst = worse(worst, { depth: pointInEllipsoid(p, part), name: part.name });
+    worst = worse(worst, { depth: pointInCapsule(p, s.l.shoulder, s.l.elbow, C.upperArmRadius), name: "l upper arm" });
+    worst = worse(worst, { depth: pointInCapsule(p, s.l.elbow, s.l.wrist, C.forearmRadius), name: "l forearm" });
+    worst = worse(worst, { depth: pointInCapsule(p, s.l.wrist, s.l.handTip, C.handRadius), name: "l hand" });
+    worst = worse(worst, { depth: pointInCapsule(p, s.r.shoulder, s.r.elbow, C.upperArmRadius), name: "r upper arm" });
+    worst = worse(worst, { depth: pointInCapsule(p, s.r.elbow, s.r.wrist, C.forearmRadius), name: "r forearm" });
+  }
+  return worst;
+}
+
 // ------------------------------------------------------------ verification
 
 export type Violation = { part: string; obstacle: string; depth: number };
@@ -552,8 +631,11 @@ export const legs = ([-1, 1] as const).map((sx) => {
   };
 });
 
-/** Every intersection in a solved pose (used by the debug overlay and sweep). */
-export function findViolations(s: Solved, tolerance = 0.002): Violation[] {
+/**
+ * Every intersection in a solved pose (used by the debug overlay and sweep).
+ * `holdingPhone` adds the phone-in-hand check for the `phone` pose.
+ */
+export function findViolations(s: Solved, tolerance = 0.002, holdingPhone = false): Violation[] {
   const out: Violation[] = [];
   const add = (part: string, h: Hit) => {
     if (h.depth > tolerance) out.push({ part, obstacle: h.name, depth: +h.depth.toFixed(4) });
@@ -576,6 +658,7 @@ export function findViolations(s: Solved, tolerance = 0.002): Violation[] {
     add(`${n} thigh`, capsuleDepth(leg.hip, leg.knee, C.thighRadius, SEAT));
     add(`${n} shin`, capsuleDepth(leg.knee, leg.ankle, C.shinRadius));
   }
+  if (holdingPhone) add("phone (in hand)", phoneHits(s));
   return out;
 }
 
@@ -601,13 +684,13 @@ export const REACHABLE_GROUPS: CharacterState[][] = [
  */
 export function sweepAll(groups: CharacterState[][] = REACHABLE_GROUPS) {
   const issues: Array<Violation & { at: string }> = [];
-  const record = (at: string, s: Solved) => {
-    for (const v of findViolations(s)) issues.push({ ...v, at });
+  const record = (at: string, s: Solved, holdingPhone = false) => {
+    for (const v of findViolations(s, undefined, holdingPhone)) issues.push({ ...v, at });
   };
   let checks = 0;
   for (const name of groups.flat()) {
     for (let t = 0; t < 6; t += 0.05) {
-      record(`${name} t=${t.toFixed(2)}`, solve(poses[name](t)));
+      record(`${name} t=${t.toFixed(2)}`, solve(poses[name](t)), name === "phone");
       checks++;
     }
   }
