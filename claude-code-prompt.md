@@ -215,7 +215,7 @@ VIVIN is a B2B wholesale platform for corporate gifting and product distribution
 **The brief**
 A wholesale business works differently from a regular online store: a large catalogue, bulk product data that changes in spreadsheets, quantity rules like minimum orders and cartons, and catalogues and reports that the team needs to export. VIVIN needed a storefront and an admin side built around those workflows.
 
-**What I worked on** (each item carries a status badge: every item `Shipped`, except Pricing rules, which is `In progress`)
+**What I worked on** (each item carries a status badge; all are `Shipped`)
 - **Storefront:** category-first browsing, category and subcategory navigation, product discovery
 - **Admin:** product management workflows, import history and reporting
 - **Bulk data:** Excel imports across thousands of products, data validation and SKU-based image matching
@@ -247,7 +247,7 @@ VIVIN moved me from building pages to handling real data and production limits: 
 
 **Links:** Live site ↗ · "Source code: private (client project)" in muted text (also on MittiNav and Christ TCEA).
 
-**Every case study** has a status, cover, gallery, outcome and links section. Statuses: VIVIN *Live · ongoing development*, MittiNav *Live*, Christ TCEA *Live*, Swamini Foods *Launched · since updated by another developer*, Being Relevant *Delivered*. Until Being Relevant's live link arrives, its "Live site" button and gallery are hidden and its cover is typographic (title, category, accent gradient). Swamini Foods' gallery is held back too: its live site has been rebuilt by another developer on a different platform, so screenshots of it wouldn't show the original build.
+**Every case study** has a status, cover, gallery, outcome and links section. Statuses: VIVIN *Live · ongoing development*, MittiNav *Live*, Christ TCEA *Live*, Swamini Foods *Launched · since updated by another developer*, Being Relevant *Delivered*. Until Being Relevant's live link arrives, its "Live site" button and gallery are hidden and its cover is typographic (title, category, accent gradient). Swamini Foods' gallery shows the current live site (home, products, a product page), captioned as such; the case-study note says the site has since been updated by another developer.
 
 **Next project →** link at the bottom of every case study, cycling through the projects.
 

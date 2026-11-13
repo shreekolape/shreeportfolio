@@ -97,7 +97,7 @@ export const projects: Project[] = [
         {
           title: "Pricing rules",
           body: "minimum order quantities and carton-based quantities",
-          status: "In progress",
+          status: "Shipped",
         },
         {
           title: "Deployment",
@@ -234,9 +234,12 @@ export const projects: Project[] = [
     repoUrl: null,
     cover: cover("swamini-foods", "Swamini Foods", "Food E-commerce"),
     previewMedia: cover("swamini-foods", "Swamini Foods", "Food E-commerce"),
-    // Hidden on purpose: the live site has been rebuilt by another developer on a
-    // different platform, so screenshots of it wouldn't show this original build.
-    gallery: [],
+    // The current live site (since updated by another developer; see the case-study note).
+    gallery: [
+      shot("swamini-foods", 1, "Home page (current live site)"),
+      shot("swamini-foods", 2, "Products page (current live site)"),
+      shot("swamini-foods", 3, "Product page (current live site)"),
+    ],
     caseStudy: {
       // The live site has since been updated by someone else: this case study covers the original build only.
       note: "This case study covers my original build. The site has since been updated by another developer.",
